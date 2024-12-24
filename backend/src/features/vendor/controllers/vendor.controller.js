@@ -151,12 +151,13 @@ const getVendorProducts = asyncHandler(async (req, res) => {
       throw new ApiError(404, 'vendor id required');
     }
     const products = await Product.find({ vendor: vId });
+
     if (!products) {
       throw new ApiError(400, 'unable to fetch products');
     }
     return res.json(new ApiResponse(200, { products }, 'products'));
   } catch (error) {
-    console.log(error);
+    throw new ApiError(400, 'error');
   }
 });
 

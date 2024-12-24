@@ -27,20 +27,9 @@ api.interceptors.response.use(
           console.log('Refresh token success:', data);
           return api(originalConfig);
         } catch (_error) {
-          console.error('Error during refresh token request:', _error);
-          console.error('Error response:', _error.response);
-          console.error('Error status:', _error.response?.status);
+          localStorage.removeItem('user') || localStorage.removeItem('vendor');
+          store.dispatch(logoutUser());
 
-          // Make sure we're checking for all possible 401 scenarios
-          if (
-            _error.response?.status === 401 ||
-            (_error.response?.status === 400 &&
-              _error.response?.data?.message?.errorCode === 'TOKEN_EXPIRED')
-          ) {
-            localStorage.removeItem('user');
-            localStorage.removeItem('vendor');
-            store.dispatch(logoutUser());
-          }
           return Promise.reject(_error);
         } finally {
           isRefreshing = false;
@@ -48,7 +37,7 @@ api.interceptors.response.use(
       }
 
       let retryCount = 0;
-      const maxRetries = 5;
+      const maxRetries = 3;
       while (isRefreshing && retryCount < maxRetries) {
         await new Promise((resolve) => setTimeout(resolve, 100));
         retryCount++;
