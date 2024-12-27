@@ -1,8 +1,9 @@
+import { useNavigate } from 'react-router-dom';
 import { useSearchFilter } from './SearchAndFilter';
 import { Card, CardContent, CardMedia, Grid, Typography } from '@mui/material';
 const ProductList = () => {
   const { filteredProducts } = useSearchFilter();
-
+  const navigate = useNavigate();
   return (
     <div>
       {filteredProducts.length > 0 ? (
@@ -10,6 +11,7 @@ const ProductList = () => {
           {filteredProducts.map((product) => (
             <Grid item xs={12} sm={6} md={3} key={product._id}>
               <Card
+                onClick={() => navigate(`/products/${product._id}`)}
                 sx={{
                   display: 'flex',
                   flexDirection: 'column',
