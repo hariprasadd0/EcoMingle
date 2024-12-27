@@ -27,7 +27,9 @@ api.interceptors.response.use(
           console.log('Refresh token success:', data);
           return api(originalConfig);
         } catch (_error) {
-          localStorage.removeItem('user') || localStorage.removeItem('vendor');
+          localStorage.removeItem('user');
+          localStorage.removeItem('vendor');
+          localStorage.removeItem('admin');
           store.dispatch(logoutUser());
 
           return Promise.reject(_error);
