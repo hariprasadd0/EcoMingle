@@ -24,12 +24,9 @@ const VendorDashboard = () => {
   ];
   const handleAddProduct = async (data) => {
     try {
-      console.log(data);
-
-      const response = await addNewProduct(data);
-      console.log(response);
+      await addNewProduct(data);
     } catch (error) {
-      console.log(error);
+      throw new Error("Couldn't add product");
     }
   };
   return (
