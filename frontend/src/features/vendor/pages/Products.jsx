@@ -8,12 +8,15 @@ import SearchInput from '../components/SearchInput';
 import FilterDropdown from '../components/FilterDropdown.jsx';
 const Products = () => {
   const { vendor } = useSelector((state) => state.vendor);
-  const vId = vendor?.data?._id;
+
+  const vId = vendor?.data?._id || vendor?._id;
 
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
+    console.log('Vendor ID:', vId);
+
     const fetchProducts = async () => {
       try {
         setLoading(true);
