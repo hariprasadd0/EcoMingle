@@ -20,6 +20,10 @@ export const getProducts = async (vId) => {
   return await api.get(`/vendor/products/${vId}`);
 };
 
+export const getProductDetails = async (id) => {
+  return await api.get(`/vendor/product/${id}`);
+};
+
 export const addNewProduct = async (data) => {
   return await api.post(`/vendor/add-product`, data, {
     headers: {
