@@ -13,6 +13,7 @@ import {
   addToWishlist,
   addToCart,
   removeFromCart,
+  getProductById,
 } from '../../product/controllers/product.controller.js';
 import {
   createProductItem,
@@ -69,6 +70,7 @@ router.patch(
 router.delete('/products/:pId', verifyJwt, isVendor, deleteProduct);
 
 //product items
+router.get('/product/:id', verifyJwt, isVendor, getProductById);
 router.post('/create-item', verifyJwt, isVendor, createProductItem);
 router.get('/products/:vId', verifyJwt, isVendor, getVendorProducts);
 router.patch('/update-item/:pId', verifyJwt, isVendor, updateProductItem);
