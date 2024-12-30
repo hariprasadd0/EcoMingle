@@ -19,6 +19,7 @@ const DialogBox = ({
   onSubmit,
   defaultValues = {},
   fields = [],
+  Title = 'Add Product',
 }) => {
   const { handleSubmit, control, watch, setValue } = useForm({
     defaultValues: {
@@ -80,7 +81,7 @@ const DialogBox = ({
 
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
-      <DialogTitle>Add Product</DialogTitle>
+      <DialogTitle>{Title}</DialogTitle>
       <form onSubmit={handleSubmit(submitForm)} encType="multipart/form-data">
         <DialogContent>
           {fields.map(
@@ -176,9 +177,7 @@ const DialogBox = ({
           </Box>
         </DialogContent>
         <DialogActions>
-          <Button onClick={onClose} color="secondary">
-            Cancel
-          </Button>
+          <Button onClick={onClose}>Cancel</Button>
           <Button type="submit" variant="contained">
             Submit
           </Button>
