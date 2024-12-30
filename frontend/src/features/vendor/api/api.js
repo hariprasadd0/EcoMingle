@@ -31,3 +31,15 @@ export const addNewProduct = async (data) => {
     },
   });
 };
+
+export const updateProduct = async (data, id) => {
+  return await api.patch(`/vendor/products/${id}`, data, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  });
+};
+
+export const deleteProduct = async (id) => {
+  return await api.delete(`/vendor/products/${id}`);
+};
