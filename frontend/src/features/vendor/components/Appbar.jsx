@@ -1,6 +1,5 @@
 import React from 'react';
 import {
-  Typography,
   AppBar,
   Toolbar,
   IconButton,
@@ -11,6 +10,7 @@ import {
 import logo from '../../../assets/images/logo.svg';
 import MenuIcon from '@mui/icons-material/Menu';
 import { useNavigate } from 'react-router-dom';
+import { logout } from '../api/api';
 const Appbar = () => {
   const [anchorEl, setAnchorEl] = React.useState(null);
 
@@ -20,6 +20,22 @@ const Appbar = () => {
 
   const handleMenuClose = () => {
     setAnchorEl(null);
+  };
+  const handleLogout = async () => {
+    handleMenuClose();
+    try {
+      const res = await logout();
+
+      if (res.data.status === 200) {
+        localStorage.removeItem('vendor');
+        window.location.href = '/login';
+      }
+    } catch (error) {
+      throw new Error('Error logging out', error);
+    } finally {
+      localStorage.removeItem('vendor');
+      window.location.href = '/login';
+    }
   };
   const navigate = useNavigate();
   return (
@@ -57,7 +73,7 @@ const Appbar = () => {
             Profile
           </MenuItem>
           <MenuItem onClick={handleMenuClose}>Settings</MenuItem>
-          <MenuItem onClick={handleMenuClose}>Logout</MenuItem>
+          <MenuItem onClick={handleLogout}>Logout</MenuItem>
         </Menu>
         <IconButton
           edge="start"
