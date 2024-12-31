@@ -1,6 +1,6 @@
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useEffect, useState } from 'react';
-import { getProductDetails, updateProduct } from '../api/api';
+import { getProductDetails, updateProduct, deleteProduct } from '../api/api';
 import {
   Card,
   CardContent,
@@ -14,12 +14,13 @@ import {
   Stack,
   Alert,
   Snackbar,
+  CircularProgress,
 } from '@mui/material';
 import DialogBox from '../components/DialogBox';
 import { Add, RemoveCircle } from '@mui/icons-material';
 const DetailProduct = () => {
+  const navigate = useNavigate();
   const { id } = useParams();
-  let pId = id;
   const [product, setProduct] = useState(null);
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -50,7 +51,17 @@ const DetailProduct = () => {
     return <Typography>Product not found</Typography>;
   }
   if (loading) {
-    return <Typography>Loading...</Typography>;
+    return (
+      <Box
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+        opacity={0.5}
+        minHeight="100vh"
+      >
+        <CircularProgress />
+      </Box>
+    );
   }
 
   const handleQuantityChange = (newValue) => {
@@ -59,7 +70,7 @@ const DetailProduct = () => {
   };
   const handleUpdateProduct = async (data) => {
     setLoading(true);
-    const res = await updateProduct(data, pId);
+    const res = await updateProduct(data, id);
     console.log(res);
     setLoading(false);
     if (res.status === 200) {
@@ -67,8 +78,20 @@ const DetailProduct = () => {
     }
     setOpen(false);
   };
-  const handleDeleteProduct = () => {
-    console.log('Delete product');
+  const handleDeleteProduct = async () => {
+    try {
+      setLoading(true);
+      const res = await deleteProduct(id);
+      console.log(res);
+
+      if (res.status === 200) {
+        navigate('/products', { replace: true });
+      }
+      setLoading(false);
+      setOpen(false);
+    } catch (error) {
+      throw new Error('Error deleting product');
+    }
   };
   const fields = [
     { name: 'productName', label: 'Product Name', required: true },
