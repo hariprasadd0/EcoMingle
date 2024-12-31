@@ -3,10 +3,13 @@ import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import GroupIcon from '@mui/icons-material/Group';
 import { useNavigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 import DialogBox from '../components/DialogBox';
 import { useState } from 'react';
 import { addNewProduct } from '../api/api';
 const VendorDashboard = () => {
+  const { vendor } = useSelector((state) => state.vendor);
+
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
 
@@ -35,8 +38,8 @@ const VendorDashboard = () => {
 
       {/* Dashboard Content */}
       <Box sx={{ padding: 3 }}>
-        <Typography variant="h4" sx={{ marginBottom: 2 }}>
-          Welcome Back, Vendor!
+        <Typography variant="h6" sx={{ marginBottom: 2 }}>
+          Welcome Back, {vendor?.username}!
         </Typography>
 
         <Grid container spacing={3}>
@@ -70,7 +73,7 @@ const VendorDashboard = () => {
               <TrendingUpIcon sx={{ fontSize: 50, color: 'info.main' }} />
               <Typography variant="h6">Products</Typography>
               <Typography variant="h4" sx={{ color: 'text.secondary' }}>
-                10
+                {vendor?.products?.length}
               </Typography>
             </Paper>
           </Grid>
@@ -89,7 +92,7 @@ const VendorDashboard = () => {
 
         {/* Quick Actions */}
         <Box sx={{ marginTop: 4 }}>
-          <Typography variant="h5" sx={{ marginBottom: 2 }}>
+          <Typography variant="h6" sx={{ marginBottom: 2 }}>
             Quick Actions
           </Typography>
           <Grid container spacing={3}>
