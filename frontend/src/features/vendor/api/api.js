@@ -43,3 +43,7 @@ export const updateProduct = async (data, id) => {
 export const deleteProduct = async (id) => {
   return await api.delete(`/vendor/products/${id}`);
 };
+
+export const logout = async () => {
+  return await api.post('/user/logout', { skipInterceptor: true });
+};
