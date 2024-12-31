@@ -12,21 +12,16 @@ const Products = () => {
   const vId = vendor?.data?._id || vendor?._id;
 
   const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     console.log('Vendor ID:', vId);
 
     const fetchProducts = async () => {
       try {
-        setLoading(true);
         const response = await getProducts(vId);
         setProducts(response.data.data.products);
       } catch (error) {
-        console.log(error);
-        setLoading(false);
-      } finally {
-        setLoading(false);
+        throw new Error(error);
       }
     };
 
@@ -34,19 +29,6 @@ const Products = () => {
       fetchProducts();
     }
   }, [vId]);
-
-  if (loading) {
-    return (
-      <Box
-        display="flex"
-        justifyContent="center"
-        alignItems="center"
-        minHeight="100vh"
-      >
-        <CircularProgress />
-      </Box>
-    );
-  }
 
   return (
     <Box sx={{ padding: 2 }}>
