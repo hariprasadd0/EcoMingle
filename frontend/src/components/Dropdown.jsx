@@ -1,6 +1,5 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { AppBar, Toolbar, Menu, MenuItem, Button, Box } from '@mui/material';
-import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import { Link } from 'react-router-dom';
 import useMediaQuery from '@mui/material/useMediaQuery';
 
@@ -53,7 +52,7 @@ function EcoFriendlyNavbar() {
       position="static"
       sx={{
         p: 0,
-        mt: -3,
+        mt: -4,
         width: '100%',
         minHeight: '50px',
         border: '1px solid #e0e0e0',
