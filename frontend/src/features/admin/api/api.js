@@ -30,3 +30,7 @@ export const approveVendor = async (id) => {
 export const rejectVendor = async (id) => {
   return await api.post(`/admin/vendors/reject/${id}`);
 };
+
+export const updateProductStatus = async (id) => {
+  return await api.post(`/admin/products/${id}`);
+};
