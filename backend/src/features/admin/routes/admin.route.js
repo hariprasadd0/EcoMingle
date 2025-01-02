@@ -15,6 +15,7 @@ import {
   getProducts,
   getProductById,
   deleteProduct,
+  updateProductStatus,
 } from '../controllers/admin.controller.js';
 const router = Router();
 
@@ -40,4 +41,6 @@ router.delete('vendors/:vId', verifyJwt, isAdmin, deleteVendor);
 router.get('/products', verifyJwt, isAdmin, getProducts);
 router.get('/products/:pId', verifyJwt, isAdmin, getProductById);
 router.delete('/products/:pId', verifyJwt, isAdmin, deleteProduct);
+router.post('/products/:pId', verifyJwt, isAdmin, updateProductStatus);
+
 export default router;
