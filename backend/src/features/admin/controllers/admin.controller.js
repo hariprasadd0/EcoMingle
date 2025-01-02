@@ -150,6 +150,18 @@ export const updateProductItem = asyncHandler(async (req, res) => {
   const { pId } = req.params;
 });
 
+export const updateProductStatus = asyncHandler(async (req, res) => {
+  const { pId } = req.params;
+
+  const product = await Product.findById(pId);
+  if (!product) {
+    throw new ApiError(404, 'Product not found');
+  }
+  product.status = 'active';
+  await product.save();
+  return res.json(new ApiResponse(200, product, 'Product status updated'));
+});
+
 // ### Admin Authentication and Profile Management
 //    - `POST /api/admin/register` - Register an admin
 //    - `POST /api/admin/login` - Login an admin
