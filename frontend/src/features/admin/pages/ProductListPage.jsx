@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { getProductById } from '../api/api';
+import { getProductById, updateProductStatus } from '../api/api';
 import {
   Box,
   Typography,
@@ -9,6 +9,8 @@ import {
   Grid,
   IconButton,
   Tooltip,
+  Button,
+  Stack,
 } from '@mui/material';
 import { MdEdit, MdDelete } from 'react-icons/md';
 
@@ -16,6 +18,7 @@ const ProductPage = () => {
   const [product, setProduct] = useState(null);
   const { id } = useParams();
   const [loading, setLoading] = useState(true);
+  const [selectedImage, setSelectedImage] = useState(0);
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -46,14 +49,18 @@ const ProductPage = () => {
       </Typography>
     );
 
-  const handleEdit = () => {
-    console.log('Editing product:', product._id);
-  };
+  const handleEdit = () => {};
 
-  const handleDelete = () => {
-    console.log('Deleting product:', product._id);
-  };
+  const handleDelete = () => {};
 
+  const handleProductStatus = async () => {
+    try {
+      const res = await updateProductStatus(product._id);
+      setProduct(res.data.data);
+    } catch (error) {
+      throw new Error('Error updating product status:');
+    }
+  };
   return (
     <Paper
       elevation={3}
@@ -67,20 +74,39 @@ const ProductPage = () => {
       <Grid container spacing={4}>
         {/* Product Images */}
         <Grid item xs={12} md={6}>
-          <Box
-            display="flex"
-            flexDirection="column"
-            gap={2}
-            alignItems="center"
-          >
-            {product.ProductImage.map((image, index) => (
-              <img
-                key={index}
-                src={image}
-                alt={`Product Image ${index + 1}`}
-                style={{ maxWidth: '100%', borderRadius: 4 }}
-              />
-            ))}
+          <Box sx={{ position: 'relative' }}>
+            <Box
+              component="img"
+              src={product.ProductImage[selectedImage]}
+              alt={product.productName}
+              sx={{
+                width: '100%',
+                height: 400,
+                objectFit: 'cover',
+                borderRadius: 1,
+              }}
+            />
+            <Stack direction="row" spacing={2} sx={{ mt: 2 }}>
+              {product.ProductImage.map((image, index) => (
+                <Box
+                  key={index}
+                  component="img"
+                  src={image}
+                  onClick={() => setSelectedImage(index)}
+                  sx={{
+                    width: 80,
+                    height: 80,
+                    objectFit: 'cover',
+                    cursor: 'pointer',
+                    borderRadius: 1,
+                    border:
+                      selectedImage === index
+                        ? '2px solid primary.main'
+                        : 'none',
+                  }}
+                />
+              ))}
+            </Stack>
           </Box>
         </Grid>
 
@@ -128,6 +154,24 @@ const ProductPage = () => {
               <MdDelete size={24} />
             </IconButton>
           </Tooltip>
+
+          {product.status === 'active' ? (
+            <Button
+              variant="contained"
+              color="error"
+              onClick={handleProductStatus}
+            >
+              Deactivate Product
+            </Button>
+          ) : (
+            <Button
+              variant="contained"
+              color="success"
+              onClick={handleProductStatus}
+            >
+              Activate Product
+            </Button>
+          )}
         </Grid>
       </Grid>
     </Paper>
