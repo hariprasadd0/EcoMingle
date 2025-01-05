@@ -14,8 +14,6 @@ const ProductList = () => {
   const getUsers = async () => {
     try {
       const response = await getAllProducts();
-      console.log(response);
-
       setProduct(response.data.data);
       return;
     } catch (error) {
@@ -35,6 +33,7 @@ const ProductList = () => {
               <TableCell>id</TableCell>
               <TableCell>product name</TableCell>
               <TableCell>category</TableCell>
+              <TableCell>status</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -49,6 +48,7 @@ const ProductList = () => {
 
                 <TableCell>{product.productName}</TableCell>
                 <TableCell>{product.category}</TableCell>
+                <TableCell>{product.status}</TableCell>
               </TableRow>
             ))}
           </TableBody>
