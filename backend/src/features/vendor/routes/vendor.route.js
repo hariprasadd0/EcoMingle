@@ -30,11 +30,10 @@ import {
   getVendorProducts,
 } from '../controllers/vendor.controller.js';
 
-import { uploadFile } from '../../../middleware/uploadFile.js';
 import { upload } from '../../../middleware/multer.middleware.js';
 const router = Router();
 
-router.post('/register', uploadFile.single('file'), createVendor);
+router.post('/register', upload.single('file'), createVendor);
 router.post('/login', vendorLogin);
 //profile
 router.get('/profile/:vId', verifyJwt, getVendor);
