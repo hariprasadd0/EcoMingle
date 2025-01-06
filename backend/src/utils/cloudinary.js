@@ -8,13 +8,18 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_SECRET,
 });
 
-const uploadFile = async (localPath, folder = 'uploads') => {
+const uploadFile = async (
+  localPath,
+  folder = 'uploads',
+  resocurceType = 'auto',
+) => {
   try {
     if (!fs.existsSync(localPath)) {
       throw new Error('File not found');
     }
     const result = await cloudinary.uploader.upload(localPath, {
       folder: folder,
+      resource_type: resocurceType,
     });
     fs.unlinkSync(localPath);
     return result;
