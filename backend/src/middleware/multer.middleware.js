@@ -1,7 +1,7 @@
 import multer from 'multer';
 import fs from 'fs';
 import path from 'path';
-//FIXME : not working
+
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     const uploadPath = path.join(
