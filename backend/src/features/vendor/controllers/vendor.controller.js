@@ -5,8 +5,8 @@ import asyncHandler from '../../../utils/asyncHandler.js';
 import User from '../../user/models/user.model.js';
 import Vendor from '../models/vendor.model.js';
 import Product, { ProductItem } from '../../product/models/product.model.js';
-// import { uploadFileToB2 } from '../middleware/uploadFile.js';
 import vendorSchema from '../../../validators/vendorSchema.js';
+import uploadFile from '../../../utils/cloudinary.js';
 
 //register
 const createVendor = asyncHandler(async (req, res) => {
@@ -31,49 +31,23 @@ const createVendor = asyncHandler(async (req, res) => {
   }
 
   const file = req.file;
-  // console.log(file);
-  // if (!file) {
-  //   throw new ApiError(400, 'Image upload failed');
-  // }
+  console.log(req.file.path);
 
+  console.log(file);
+  if (!file) {
+    throw new ApiError(400, 'Image upload failed');
+  }
+  try {
+    const pdfUpload = await uploadFile(req.file.path, 'uploads', 'raw');
+    console.log(pdfUpload);
+  } catch (error) {
+    console.log(error);
+  }
   const userExist = await User.findOne({ email });
   if (userExist) {
     throw new ApiError(409, 'User already exists');
   }
 
-  //vendor certification img or pdf upload
-
-  // const bucketId = process.env.B2_BUCKET_ID;
-  // console.log(bucketId);
-  // const result = await uploadFileToB2(file, bucketId);
-  // console.log(result);
-
-  // const response = await downloadFile(bucketId, result.fileId);
-  // console.log(response);
-  // const imageUrls = [];
-  // await Promise.all(
-  //   req.files.map((file) => {
-  //     const { path } = file;
-  //     const result = uploadFile(path, 'vendors');
-  //     if (result && result.secure_url) {
-  //       imageUrls.push(result.secure_url);
-  //       fs.unlinkSync(path);
-  //     }
-  //   }),
-  // );
-  // if (imageUrls.length === 0) {
-  //   throw new ApiError(400, 'Image upload failed');
-  // }
-  //vendor profile-img  upload
-  // const fileMetadata = [
-  //   {
-  //     fileName: file.originalname,
-  //     fileUrl: result.fileUrl,
-  //     fileSize: file.size,
-  //     fileType: file.mimetype,
-  //   },
-  // ];
-  //not implemented yet some issue relies
   const vendor = new Vendor({
     username,
     email,
