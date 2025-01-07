@@ -24,7 +24,7 @@ const VendorApplication = () => {
   }, []);
 
   return (
-    <TableContainer component={Paper} sx={{ margin: 'auto', mt: 4 }}>
+    <TableContainer component={Paper} sx={{ margin: 'auto', mt: 4, p: 2 }}>
       <Typography variant="h6" gutterBottom>
         Vendor Applications
       </Typography>
@@ -47,7 +47,7 @@ const VendorApplication = () => {
         </TableHead>
         <TableBody>
           {vendor.map((vendor) => (
-            <TableRow key={vendor.id}>
+            <TableRow key={vendor._id}>
               <TableCell>
                 {' '}
                 <Link to={`/vendors/${vendor._id}`}>{vendor._id}</Link>
