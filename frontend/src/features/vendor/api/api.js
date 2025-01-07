@@ -2,6 +2,9 @@ import api from '../../../utils/api';
 
 export const vendorRegister = async (data) => {
   return await api.post(`/vendor/register`, data, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
     skipInterceptor: true,
   });
 };
