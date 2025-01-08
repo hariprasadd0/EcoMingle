@@ -9,11 +9,13 @@ import {
   Chip,
   createTheme,
   ThemeProvider,
+  Snackbar,
+  Alert,
 } from '@mui/material';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { registerVendor } from '../../vendor/vendorSlice.js';
 import { useNavigate } from 'react-router-dom';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 
 const theme = createTheme({
   palette: {
@@ -43,6 +45,7 @@ const theme = createTheme({
 });
 
 const VendorRegister = () => {
+  const { success, error } = useSelector((state) => state.vendor);
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const {
@@ -50,11 +53,34 @@ const VendorRegister = () => {
     handleSubmit,
     formState: { errors },
     setValue,
+    reset,
   } = useForm();
   const [categories, setCategories] = useState([]);
+  const [open, setOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState('');
+  const [snackbarSeverity, setSnackbarSeverity] = useState('success');
+
+  useEffect(() => {
+    if (success) {
+      setSnackbarMessage('Registration successful!');
+      setSnackbarSeverity('success');
+      setOpen(true);
+    }
+
+    if (error) {
+      setSnackbarMessage(`Error: ${error.message || 'Something went wrong'}`);
+      setSnackbarSeverity('error');
+      setOpen(true);
+    }
+  }, [success, error]);
+
+  const handleClose = () => {
+    setOpen(false);
+  };
 
   const handleCategoryAdd = (event) => {
     if (event.key === 'Enter' && event.target.value) {
+      event.preventDefault();
       setCategories([...categories, event.target.value]);
       setValue('categories', [...categories, event.target.value]);
       event.target.value = '';
@@ -69,8 +95,32 @@ const VendorRegister = () => {
     setValue('categories', updatedCategories);
   };
 
+  const handleFileUpload = (e) => {
+    const file = e.target.files;
+
+    setValue('docfile', file);
+  };
   const onSubmit = async (data) => {
-    dispatch(registerVendor(data));
+    const formData = new FormData();
+    formData.append('username', data.username);
+    formData.append('email', data.email);
+    formData.append('description', data.description);
+    formData.append('phone', data.phone);
+    formData.append('password', data.password);
+    formData.append('categories', JSON.stringify(data.categories || []));
+
+    if (data.docfile && data.docfile[0]) {
+      formData.append('docfile', data.docfile[0]);
+    }
+    formData.append('location[address]', data.location.address);
+    formData.append('location[city]', data.location.city);
+    formData.append('location[state]', data.location.state);
+    formData.append('location[country]', data.location.country);
+
+    dispatch(registerVendor(formData));
+
+    setCategories([]);
+    reset();
   };
 
   return (
@@ -87,6 +137,15 @@ const VendorRegister = () => {
         <Typography variant="h4" align="center" gutterBottom>
           Vendor Registration
         </Typography>
+        <Snackbar open={open} autoHideDuration={6000} onClose={handleClose}>
+          <Alert
+            onClose={handleClose}
+            severity={snackbarSeverity}
+            sx={{ width: '100%' }}
+          >
+            {snackbarMessage}
+          </Alert>
+        </Snackbar>
         <form onSubmit={handleSubmit(onSubmit)}>
           <Grid container spacing={3}>
             <Grid item xs={12} sm={6}>
@@ -312,6 +371,16 @@ const VendorRegister = () => {
                 )}
               />
             </Grid>
+            <Grid item xs={12}>
+              <input
+                accept="application/pdf"
+                id="upload-button"
+                type="file"
+                name="docfile"
+                onChange={handleFileUpload}
+              />
+            </Grid>
+
             <Grid item xs={12} display="flex" justifyContent="center">
               <Button type="submit" variant="contained" color="primary">
                 Register
