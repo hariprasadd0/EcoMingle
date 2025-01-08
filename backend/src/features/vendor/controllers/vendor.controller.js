@@ -10,9 +10,7 @@ import uploadFile from '../../../utils/cloudinary.js';
 
 //register
 const createVendor = asyncHandler(async (req, res) => {
-  const { error, value } = vendorSchema.validate(req.body, {
-    abortEarly: false,
-  });
+  const categories = JSON.parse(req.body.categories);
 
   const {
     username,
@@ -24,25 +22,30 @@ const createVendor = asyncHandler(async (req, res) => {
     pan,
     website,
     location,
-    categories,
-  } = value;
-  if (error) {
-    throw new ApiError(401, error.details.message);
-  }
+  } = req.body;
 
   const file = req.file;
-  console.log(req.file.path);
-
-  console.log(file);
   if (!file) {
-    throw new ApiError(400, 'Image upload failed');
+    throw new Error('please provide document');
   }
-  try {
-    const pdfUpload = await uploadFile(req.file.path, 'uploads', 'raw');
-    console.log(pdfUpload);
-  } catch (error) {
-    console.log(error);
+  let fileData = {};
+  if (file) {
+    try {
+      const pdfUpload = await uploadFile(req.file.path, 'uploads', 'raw');
+      console.log(pdfUpload);
+
+      fileData = {
+        fileName: pdfUpload.original_filename,
+        fileUrl: pdfUpload.secure_url,
+        fileSize: pdfUpload.bytes,
+        fileType: pdfUpload.resource_type,
+      };
+    } catch (error) {
+      console.error('File upload failed:', error);
+      throw new ApiError(400, 'Failed to upload file');
+    }
   }
+
   const userExist = await User.findOne({ email });
   if (userExist) {
     throw new ApiError(409, 'User already exists');
@@ -59,12 +62,15 @@ const createVendor = asyncHandler(async (req, res) => {
     website,
     location,
     categories,
+    files: file ? [fileData] : [],
     status: 'pending',
     role: 'vendor',
   });
 
   try {
     const newVendor = await vendor.save();
+    console.log(newVendor);
+
     return res.json(
       new ApiResponse(
         200,
