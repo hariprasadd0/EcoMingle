@@ -5,6 +5,8 @@ import { addNewProduct, vendorLogin, vendorRegister } from './api/api';
 const initialState = {
   vendor: TokenService.getUser('vendor') || null,
   isAuth: false,
+  success: false,
+  error: null,
 };
 
 export const registerVendor = createAsyncThunk(
@@ -49,6 +51,12 @@ const vendorSlice = createSlice({
     builder.addCase(loginVendor.fulfilled, (state, action) => {
       state.isAuth = true;
       state.vendor = action.payload?.data;
+    });
+    builder.addCase(registerVendor.fulfilled, (state, action) => {
+      state.success = true;
+    });
+    builder.addCase(registerVendor.rejected, (state, action) => {
+      state.error = action.payload;
     });
   },
 });
