@@ -1,3 +1,4 @@
+import { v2 as cloudinary } from 'cloudinary';
 import asyncHandler from '../../../utils/asyncHandler.js';
 import { ApiError } from '../../../utils/ApiError.js';
 import { ApiResponse } from '../../../utils/ApiResponse.js';
@@ -75,7 +76,25 @@ export const approveVendor = asyncHandler(async (req, res) => {
 // post reject vendor
 export const rejectVendor = asyncHandler(async (req, res) => {
   const { id } = req.params;
+
   const vendor = await Vendor.findByIdAndUpdate(id, { status: 'rejected' });
+
+  const file = vendor.files[0].fileUrl;
+  if (!file) {
+    throw new ApiError(400, 'file not found');
+  }
+  const publicId = 'uploads/' + file.split('/').pop();
+
+  if (publicId) {
+    try {
+      await cloudinary.uploader.destroy(publicId, {
+        resource_type: 'raw',
+      });
+    } catch (error) {
+      throw new Error('error', error);
+    }
+  }
+
   if (!vendor) {
     throw new ApiError(400, 'no vendors found');
   }
