@@ -33,7 +33,7 @@ import {
 import { upload } from '../../../middleware/multer.middleware.js';
 const router = Router();
 
-router.post('/register', upload.single('file'), createVendor);
+router.post('/register', upload.single('docfile'), createVendor);
 router.post('/login', vendorLogin);
 //profile
 router.get('/profile/:vId', verifyJwt, getVendor);
