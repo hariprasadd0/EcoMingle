@@ -13,7 +13,7 @@ import Vendor from '../../vendor/models/vendor.model.js';
 export const getAllUsers = asyncHandler(async (req, res) => {
   const users = await User.find();
   if (!users) {
-    throw new ApiError(404, 'Users not found');
+    throw new ApiError(401, 'Users not found');
   }
   return res.status(200).json(new ApiResponse(200, { users }, 'Users'));
 });
@@ -60,7 +60,7 @@ export const deleteUser = asyncHandler(async (req, res) => {
 export const getAppliedVendors = asyncHandler(async (req, res) => {
   const vendors = await Vendor.find({ status: 'pending' });
   if (!vendors) {
-    throw new ApiError(400, 'no vendors found');
+    throw new ApiError(401, 'no vendors found');
   }
   return res.json(new ApiResponse(200, vendors, 'vendors'));
 });
