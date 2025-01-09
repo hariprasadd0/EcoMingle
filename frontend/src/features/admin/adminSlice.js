@@ -13,11 +13,11 @@ export const getCustomerCount = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const response = await getAllUsers();
-      const users = response?.data?.data.users;
+      const users = response?.data?.data?.users;
       const count = users.length;
       return count;
     } catch (error) {
-      return rejectWithValue(error);
+      return rejectWithValue(error.message);
     }
   },
 );
@@ -27,10 +27,10 @@ export const getProductsCount = createAsyncThunk(
     try {
       const response = await getAllProducts();
       const products = response?.data?.data;
-      const count = products.length;
+      const count = products?.length;
       return count;
     } catch (error) {
-      return rejectWithValue(error);
+      return rejectWithValue(error.message);
     }
   },
 );
