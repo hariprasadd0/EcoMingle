@@ -30,15 +30,13 @@ const DetailProduct = () => {
     // Fetch product details based on the id
     const fetchProductDetails = async () => {
       try {
-        console.log('fetching product details');
-
         setLoading(true);
         const response = await getProductDetails(id);
         setProduct(response.data?.data.product);
         setLoading(false);
       } catch (error) {
         setLoading(false);
-        console.error(error);
+        throw new Error(error);
       }
     };
     fetchProductDetails();
