@@ -17,6 +17,8 @@ const VendorDashboard = () => {
     { name: 'productName', label: 'Product Name', required: true },
     { name: 'price', label: 'Price', type: 'number', required: true },
     { name: 'description', label: 'Description', multiline: true, rows: 4 },
+    { name: 'material', label: 'Material', required: true },
+
     {
       name: 'category',
       label: 'Category',
