@@ -6,10 +6,16 @@ import { Card, Chip, Typography, Box, Button, IconButton } from '@mui/material';
 import { LuShoppingBasket, LuHeart } from 'react-icons/lu';
 import './carousel.css';
 import './base.css';
+import { useNavigate } from 'react-router-dom';
+import { addToWishlist } from '../../api/wishlistApi';
+import { addToCart } from '../../cartSlice';
+import { useDispatch } from 'react-redux';
 
-import Brush from '../../../../assets/images/brush.svg';
 const EmblaCarousel = (props) => {
-  const { slides, options } = props;
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const { slides, options, product } = props;
+
   const [emblaRef, emblaApi] = useEmblaCarousel(options, [Autoplay()]);
 
   const onNavButtonClick = useCallback((emblaApi) => {
@@ -28,6 +34,17 @@ const EmblaCarousel = (props) => {
     emblaApi,
     onNavButtonClick,
   );
+  const handleAddToCart = (id) => {
+    const data = {
+      productId: id,
+      quantity: 1,
+    };
+
+    dispatch(addToCart(data));
+  };
+  if (!slides || !product) {
+    return <div>d</div>;
+  }
 
   return (
     <Card
@@ -53,62 +70,75 @@ const EmblaCarousel = (props) => {
             </div>
           </div>
         </div>
-        <div className="product_descrtiption">
-          <Typography fontSize={24} color={'text.primary'}>
-            One Good Brush - Biodegradable Toothbrush
-          </Typography>
-          <Box>
-            <img src={Brush} alt="" />
-          </Box>
-          <Box
-            sx={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              width: '100%',
-            }}
-          >
-            <Button variant="outlined" sx={{ borderRadius: 6, px: 3, py: 0.5 }}>
-              <Typography fontSize={14} color="text.primary">
-                Details
-              </Typography>
-            </Button>
-            <Box sx={{ display: 'flex', gap: '10px' }}>
-              <IconButton
-                size="small"
-                sx={{
-                  borderRadius: '50%',
-                  border: '1px solid #2e7d32',
-                  p: 1,
-                }}
-              >
-                <LuHeart fontSize={20} strokeWidth={1.5} />
-              </IconButton>
-              <IconButton
-                size="small"
-                sx={{
-                  borderRadius: '50%',
-                  backgroundColor: 'primary.main',
-                  p: 1,
-                  ':hover': {
-                    backgroundColor: 'primary.main',
-                  },
-                }}
-              >
-                <LuShoppingBasket
-                  color="white"
-                  fontSize={20}
-                  strokeWidth={1.5}
-                />
-              </IconButton>
+        {product.map((item) => (
+          <div key={item._id} className="product_descrtiption">
+            <Typography fontSize={24} color={'text.primary'}>
+              {item.productName}
+            </Typography>
+            <Box>
+              <img
+                width={'320px'}
+                height={'310px'}
+                src={item.ProductImage[0]}
+                alt={item.productName}
+              />
             </Box>
-          </Box>
-        </div>
+            <Box
+              sx={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                width: '100%',
+              }}
+            >
+              <Button
+                onClick={() => navigate(`/product/${item._id}`)}
+                variant="outlined"
+                sx={{ borderRadius: 6, px: 3, py: 0.5 }}
+              >
+                <Typography fontSize={14} color="text.primary">
+                  Details
+                </Typography>
+              </Button>
+              <Box sx={{ display: 'flex', gap: '10px' }}>
+                <IconButton
+                  onClick={() => addToWishlist(item._id)}
+                  size="small"
+                  sx={{
+                    borderRadius: '50%',
+                    border: '1px solid #2e7d32',
+                    p: 1,
+                  }}
+                >
+                  <LuHeart fontSize={20} strokeWidth={1.5} />
+                </IconButton>
+                <IconButton
+                  onClick={() => handleAddToCart(item._id)}
+                  size="small"
+                  sx={{
+                    borderRadius: '50%',
+                    backgroundColor: 'primary.main',
+                    p: 1,
+                    ':hover': {
+                      backgroundColor: 'primary.main',
+                    },
+                  }}
+                >
+                  <LuShoppingBasket
+                    color="white"
+                    fontSize={20}
+                    strokeWidth={1.5}
+                  />
+                </IconButton>
+              </Box>
+            </Box>
+          </div>
+        ))}
       </section>
       <div className="embla__viewport" ref={emblaRef}>
         <div className="embla__container">
-          {slides.map((slide) => (
-            <div className="embla__slide" key={slide}>
+          {slides.map((slide, index) => (
+            <div className="embla__slide" key={index}>
               <img className="slide_image" src={slide} alt="Slide" />
             </div>
           ))}
