@@ -79,7 +79,7 @@ const ShopCard = ({ label, image, title, price, onClick }) => {
           alignItems: 'center',
         }}
       >
-        <Typography variant="h6" fontSize={16} color="text.primary">
+        <Typography variant="h6" fontSize={14} color="text.primary">
           {title}
         </Typography>
 
