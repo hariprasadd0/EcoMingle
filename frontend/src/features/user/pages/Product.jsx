@@ -198,10 +198,8 @@ const ProductPage = () => {
     ); // Show a loading state while fetching data
   }
 
-  const inventoryCount = product.productItems[0].inventoryCount;
+  const inventoryCount = product.productItems[0]?.inventoryCount;
 
-  if (inventoryCount > 0) {
-  }
   const Icons = [BiColorFill, BiColorFill, BiColorFill];
 
   const handleAddToCart = () => {
@@ -240,7 +238,7 @@ const ProductPage = () => {
               label={'4.2 — 54 Reviews'}
             />
 
-            {product.productItems[0].inventoryCount <= 0 ? (
+            {inventoryCount <= 0 ? (
               <Chip
                 variant="outlined"
                 label="OUT OF STOCK"
