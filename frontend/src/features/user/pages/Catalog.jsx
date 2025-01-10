@@ -1,10 +1,7 @@
 import { useState, useEffect } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
-import {
-  getProductByCategory,
-  getProductsThunk,
-} from '../../product/productSlice.js';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import { useProducts } from '../hooks/useProducts.jsx';
 import {
   Box,
   Card,
@@ -17,72 +14,51 @@ import {
   FormControl,
   Select,
   MenuItem,
-  Radio,
-  FormControlLabel,
-  RadioGroup,
+  Button,
   CircularProgress,
 } from '@mui/material';
 import { IoIosArrowDown } from 'react-icons/io';
+import { addToCart } from '../cartSlice.js';
 
-// Sample Data
-const Categories = [
-  { id: 1, name: 'Electronics' },
-  { id: 2, name: 'Clothing' },
-  { id: 3, name: 'Books' },
-  { id: 4, name: 'Home & Garden' },
-  { id: 5, name: 'Sports & Outdoors' },
-];
+const useCategories = () => {
+  const { products } = useProducts();
+  const categories = products.map((item, index) => ({
+    id: index,
+    name: item.category,
+  }));
 
-const Colors = ['Red', 'Blue', 'Green', 'Black', 'White'];
-const Materials = ['Cotton', 'Leather', 'Plastic', 'Metal', 'Wood'];
-
-// Custom hook for products
-const useProducts = () => {
-  const dispatch = useDispatch();
-  const { products, status } = useSelector((state) => state.product);
-  const [category, setCategory] = useState(null);
-
-  const fetchProductsByCategory = (category) => {
-    dispatch(getProductByCategory(category));
-  };
-
-  useEffect(() => {
-    if (category) {
-      fetchProductsByCategory(category);
-    } else {
-      dispatch(getProductsThunk());
-    }
-  }, [category, dispatch]);
-
-  return { products, status, setCategory };
+  const materials = products.map((item, index) => ({
+    id: index,
+    name: item.material,
+  }));
+  return { categories, materials };
 };
 
 // Sidebar for Filters
 const SideNav = ({
   selectedCategories,
   toggleCategory,
-  selectedColors,
-  toggleColor,
   selectedMaterials,
   toggleMaterial,
   priceRange,
   setPriceRange,
 }) => {
+  const { categories, materials } = useCategories();
   return (
     <Card
       elevation={2}
       sx={{
         boxShadow: 'none',
-        px: 2,
         border: '1px solid #e0e0e0',
         borderRadius: '0px',
         borderBottom: 'none',
         borderLeft: 'none',
         borderTop: 'none',
+        width: 1 / 4,
       }}
     >
-      <FilterSection title="Categories">
-        {Categories.map((category) => (
+      <FilterSection title="Product Type">
+        {categories.map((category) => (
           <Box
             key={category.id}
             sx={{
@@ -130,43 +106,31 @@ const SideNav = ({
         />
       </FilterSection>
 
-      <FilterSection title="Colors">
-        <RadioGroup row sx={{ display: 'flex' }}>
-          {Colors.map((color) => (
-            <FormControlLabel
-              key={color}
-              value={color}
-              control={
-                <Radio
-                  checked={selectedColors.includes(color)}
-                  onChange={() => toggleColor(color)}
-                  sx={{
-                    color: color.toLowerCase(),
-                    '&.Mui-checked': { color: color.toLowerCase() },
-                  }}
-                />
-              }
-              label={color}
-            />
-          ))}
-        </RadioGroup>
-      </FilterSection>
-
       <FilterSection title="Materials">
-        <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mt: 1 }}>
-          {Materials.map((material) => (
-            <Chip
-              key={material}
-              label={material}
-              clickable
-              color={
-                selectedMaterials.includes(material) ? 'primary' : 'default'
-              }
-              onClick={() => toggleMaterial(material)}
-              size="small"
-            />
-          ))}
-        </Box>
+        {materials.length !== 0 ? (
+          <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mt: 1 }}>
+            {materials
+              .filter(
+                (material) => material.name && material.name.trim() !== '',
+              )
+              .map((material) => (
+                <Chip
+                  key={material.id}
+                  label={material.name}
+                  clickable
+                  color={
+                    selectedMaterials.includes(material.name)
+                      ? 'primary'
+                      : 'default'
+                  }
+                  onClick={() => toggleMaterial(material.name)}
+                  size="small"
+                />
+              ))}
+          </Box>
+        ) : (
+          ''
+        )}
       </FilterSection>
     </Card>
   );
@@ -183,7 +147,6 @@ const FilterSection = ({ title, children }) => (
 
 const AppliedFilters = ({
   selectedCategories,
-  selectedColors,
   selectedMaterials,
   handleDeleteFilter,
 }) => {
@@ -202,15 +165,7 @@ const AppliedFilters = ({
             size="small"
           />
         ))}
-        {selectedColors.map((label) => (
-          <Chip
-            key={`color-${label}`}
-            label={label}
-            onDelete={() => handleDeleteFilter(label, 'color')}
-            variant="outlined"
-            size="small"
-          />
-        ))}
+
         {selectedMaterials.map((label) => (
           <Chip
             key={`material-${label}`}
@@ -244,19 +199,32 @@ const SortBy = ({ sortBy, setSortBy }) => {
 
 const ProductGrid = ({ products, loading, error }) => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   if (loading) return <CircularProgress />;
   if (error) return <Typography color="error">{error}</Typography>;
+  if (products.length === 0) {
+    return (
+      <Typography variant="h6" color="text.secondary" textAlign="center" mt={4}>
+        No products found
+      </Typography>
+    );
+  }
+  const handleAddToCart = (id) => {
+    const data = {
+      productId: id,
+      quantity: 1,
+    };
+
+    dispatch(addToCart(data));
+  };
 
   return (
     <Grid container spacing={2}>
       {products.map((product) => (
         <Grid item xs={12} sm={6} md={4} key={product._id}>
-          <Card
-            onClick={() => navigate(`/product/${product._id}`)}
-            sx={{ cursor: 'pointer' }}
-          >
-            <CardContent>
+          <Card sx={{ cursor: 'pointer' }}>
+            <CardContent onClick={() => navigate(`/product/${product._id}`)}>
               <img
                 src={product.ProductImage[0]}
                 alt={product.productName}
@@ -272,6 +240,20 @@ const ProductGrid = ({ products, loading, error }) => {
                 ${product.price}
               </Typography>
             </CardContent>
+            <Button
+              onClick={() => handleAddToCart(product._id)}
+              fullWidth
+              sx={{
+                backgroundColor: 'primary.main',
+                color: 'white',
+                my: 2,
+                '&:hover': {
+                  backgroundColor: 'primary.main',
+                },
+              }}
+            >
+              Add to Cart
+            </Button>
           </Card>
         </Grid>
       ))}
@@ -280,21 +262,28 @@ const ProductGrid = ({ products, loading, error }) => {
 };
 
 const Catalog = () => {
+  const { category } = useParams();
+
   const [selectedCategories, setSelectedCategories] = useState([]);
-  const [selectedColors, setSelectedColors] = useState([]);
   const [selectedMaterials, setSelectedMaterials] = useState([]);
+
   const [sortBy, setSortBy] = useState('price');
   const [priceRange, setPriceRange] = useState([0, 100]);
   const { products, status, error, setCategory } = useProducts();
+
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
   const searchQuery = searchParams.get('search');
 
   useEffect(() => {
-    if (searchQuery) {
+    if (!searchQuery && !category) {
+      setCategory(null);
+    } else if (searchQuery) {
       setCategory([searchQuery]);
+    } else {
+      setCategory(category);
     }
-  }, [searchQuery, setCategory]);
+  }, [searchQuery, setCategory, category]);
 
   const toggleCategory = (category) => {
     setSelectedCategories((prev) =>
@@ -302,13 +291,7 @@ const Catalog = () => {
         ? prev.filter((item) => item !== category)
         : [...prev, category],
     );
-    setCategory(category);
-  };
-
-  const toggleColor = (color) => {
-    setSelectedColors((prev) =>
-      prev.includes(color) ? prev.filter((item) => item !== color) : [color],
-    );
+    setCategory([...selectedCategories, category]);
   };
 
   const toggleMaterial = (material) => {
@@ -317,13 +300,14 @@ const Catalog = () => {
         ? prev.filter((item) => item !== material)
         : [...prev, material],
     );
+
+    console.log(material);
   };
 
   const handleDeleteFilter = (label, filterType) => {
     if (filterType === 'category')
       setSelectedCategories((prev) => prev.filter((item) => item !== label));
-    if (filterType === 'color')
-      setSelectedColors((prev) => prev.filter((item) => item !== label));
+
     if (filterType === 'material')
       setSelectedMaterials((prev) => prev.filter((item) => item !== label));
   };
@@ -333,8 +317,6 @@ const Catalog = () => {
       <SideNav
         selectedCategories={selectedCategories}
         toggleCategory={toggleCategory}
-        selectedColors={selectedColors}
-        toggleColor={toggleColor}
         selectedMaterials={selectedMaterials}
         toggleMaterial={toggleMaterial}
         priceRange={priceRange}
@@ -344,7 +326,6 @@ const Catalog = () => {
         <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
           <AppliedFilters
             selectedCategories={selectedCategories}
-            selectedColors={selectedColors}
             selectedMaterials={selectedMaterials}
             handleDeleteFilter={handleDeleteFilter}
           />
