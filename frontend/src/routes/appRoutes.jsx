@@ -44,7 +44,6 @@ const AppRoutes = () => {
           <Navigate to={isAuthenticated ? '/dashboard' : '/login'} replace />
         }
       />
-      <Route path="*" element={<ProtectedRoute element={NotFound} />} />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
       <Route path="/vendor-register" element={<VendorRegister />} />
@@ -88,6 +87,7 @@ const AppRoutes = () => {
       />
       <Route path="/product/:id" element={<ProductPage />} />
       <Route path="/catalog" element={<Catalog />} />
+      <Route path="/catalog/:category" element={<Catalog />} />
       <Route path="/cart" element={<Cart />} />
 
       {/* Admin Routes */}
