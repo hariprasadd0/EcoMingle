@@ -6,32 +6,28 @@ import useMediaQuery from '@mui/material/useMediaQuery';
 const categories = [
   {
     name: 'Organic Food',
-    subcategories: ['Fruits & Vegetables', 'Grains', 'Dairy Products'],
+    subcategories: ['Fruits & Vegetables', 'Grains'],
   },
   {
-    name: 'Kitchen & Décor',
-    subcategories: ['Utensils', 'Furniture', 'Home Décor'],
+    name: 'Kitchen & Decor',
+    subcategories: ['Utensils', 'Furniture'],
   },
   {
     name: 'Electronics',
-    subcategories: ['Solar Chargers', 'Energy-efficient Appliances'],
-  },
-  {
-    name: 'Kids',
-    subcategories: ['Toys', 'Clothing', 'Books'],
-  },
-  {
-    name: 'Fashion',
-    subcategories: ['Men', 'Women', 'Eco-friendly Fabrics'],
+    subcategories: ['Solar Chargers'],
   },
   {
     name: 'Personal Care',
-    subcategories: ['Organic Skincare', 'Haircare', 'Dental Care'],
+    subcategories: ['Organic Skincare', 'Dental Care'],
+  },
+  {
+    name: 'Home & Living',
+    subcategories: ['Reusable Bags', 'Stationery'],
   },
 ];
 
 function EcoFriendlyNavbar() {
-  const matches = useMediaQuery('(min-width:600px)');
+  const matches = useMediaQuery('(max-width:600px)');
   const [anchorEl, setAnchorEl] = useState(null);
   const [hoveredCategory, setHoveredCategory] = useState(null);
 
@@ -45,14 +41,14 @@ function EcoFriendlyNavbar() {
     setHoveredCategory(null);
   };
 
-  if (!matches) return null;
+  // if (!matches) return null;
+  const fontSize = matches ? '10px' : '12px';
 
   return (
     <AppBar
       position="static"
       sx={{
         p: 0,
-        mt: -4,
         width: '100%',
         minHeight: '50px',
         border: '1px solid #e0e0e0',
@@ -75,11 +71,11 @@ function EcoFriendlyNavbar() {
             onMouseLeave={handleMouseLeave}
           >
             <Button
+              fullWidth
               sx={{
                 color: '#2c2c2c',
                 fontWeight: 'medium',
-                fontSize: '12px',
-
+                fontSize: `${fontSize}`,
                 '&:hover': {
                   backgroundColor: 'rgba(0, 0, 0, 0.04)',
                 },
@@ -126,7 +122,7 @@ function EcoFriendlyNavbar() {
                   }}
                 >
                   <Link
-                    to={`/category/${sub.toLowerCase().replace(/ /g, '-')}`}
+                    to={`/catalog/${sub.toLowerCase().replace(/ /g, '-')}`}
                     style={{
                       textDecoration: 'none',
                       color: '#000',
