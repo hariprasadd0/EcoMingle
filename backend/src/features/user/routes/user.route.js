@@ -21,6 +21,7 @@ import {
   addToWishlist,
   addToCart,
   removeFromCart,
+  getAllProducts,
 } from '../../product/controllers/product.controller.js';
 const router = Router();
 
@@ -39,6 +40,7 @@ router.post('/orders/ratings/:pId', verifyJwt, rateProduct);
 
 //products
 router.get('/products/:id', getProductById);
+router.get('/all-products', getAllProducts);
 router.get('/category', getProductsByCategory);
 router.put('/wishlist', verifyJwt, addToWishlist);
 router.get('/cart', verifyJwt, getUserCart);
