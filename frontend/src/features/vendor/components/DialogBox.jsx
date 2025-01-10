@@ -27,6 +27,7 @@ const DialogBox = ({
       price: '',
       description: '',
       category: '',
+      material: '',
       ProductImage: [],
       ...defaultValues,
     },
@@ -58,21 +59,19 @@ const DialogBox = ({
     formData.append('price', data.price);
     formData.append('description', data.description);
     formData.append('category', data.category);
+    formData.append('material', data.material);
 
     // Append image files
     if (data.ProductImage && Array.isArray(data.ProductImage)) {
-      console.log('Files to be sent:', data.ProductImage);
-
       data.ProductImage.forEach((file, index) => {
-        console.log('Appending file:', file);
         if (file instanceof File) {
           formData.append(`ProductImage[]`, file);
         } else {
-          console.error('Not a valid file:', file);
+          throw Error('Not a valid file:', file);
         }
       });
     } else {
-      console.error('No valid files found in ProductImage');
+      throw Error('No valid files found in ProductImage');
     }
 
     onSubmit(formData);
