@@ -24,7 +24,17 @@ const VendorDashboard = () => {
       label: 'Category',
       select: true,
       required: true,
-      options: ['Electronics', 'Fashion', 'Home Appliances'],
+      options: [
+        'Fruits & Vegetables',
+        'Grains',
+        'Reusable Bags',
+        'Stationery',
+        'Organic Skincare',
+        'Dental Care ',
+        'Utensils',
+        'Furniture ',
+        'Solar Chargers',
+      ],
     },
   ];
   const handleAddProduct = async (data) => {
