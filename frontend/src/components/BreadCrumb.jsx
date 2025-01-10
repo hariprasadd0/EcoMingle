@@ -19,7 +19,8 @@ const BreadCrumbs = (props) => {
     pathnames.includes('vendor-register') ||
     pathnames.includes('forgetpassword') ||
     pathnames.includes('reset-password') ||
-    pathnames.includes('vendor-login')
+    pathnames.includes('vendor-login') ||
+    pathnames.includes('dashboard')
   ) {
     pathnames.splice(0, 1);
   }
@@ -30,8 +31,8 @@ const BreadCrumbs = (props) => {
       separator={'>'}
       sx={{
         width: '100%',
-        pt: 3,
-        px: 3,
+        pt: 1,
+        px: 1,
         backgroundColor: '#ffffff',
       }}
     >
