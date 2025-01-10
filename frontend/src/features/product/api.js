@@ -1,7 +1,7 @@
 import api from '../../utils/api';
 
 export const getProducts = () => {
-  return api.get('/vendor/products');
+  return api.get('/user/all-products');
 };
 export const getProductsByCategory = (category) => {
   return api.get(`user/category/?category=${category}`);
