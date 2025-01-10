@@ -14,7 +14,7 @@ import Brush from '../../../assets/images/brush.svg';
 import EmblaCarousel from '../components/carousel';
 import eco from '../../../assets/images/eco.mp4';
 import ShopCard from '../components/ShopCard';
-import EcoFriendlyNavbar from '../../../components/Dropdown';
+import { useProducts } from '../hooks/useProducts';
 
 function TabPanel({ children, value, index }) {
   return (
@@ -88,35 +88,11 @@ const Dashboard = () => {
     'https://i.postimg.cc/RZFXpcv0/organiser.png ',
     'https://i.postimg.cc/13jMkfzr/Pot.png',
   ];
-  const images = [
-    'https://images.unsplash.com/photo-1538688525198-9b88f6f53126?ixlib=rb-1.2.1&auto=format&fit=crop&w=1470&q=80', // Wooden chair
-    'https://images.unsplash.com/photo-1606760227091-3dd870d97f1d?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80', // Wooden table
-    'https://images.unsplash.com/photo-1493663284031-b7e3aefcae8e?ixlib=rb-1.2.1&auto=format&fit=crop&w=1470&q=80', // Wooden shelves
-  ];
-  const products = [
-    {
-      id: 1,
-      image: Brush,
-      title: 'One Good Brush ',
-      label: 'special offer',
-      price: '$19.99',
-      rating: 4.5,
-    },
-    {
-      id: 2,
-      image: Brush,
-      title: 'One Good Brush',
-      price: '$19.99',
-      rating: 4.5,
-    },
-    {
-      id: 3,
-      image: Brush,
-      title: 'One Good Brush',
-      price: '$19.99',
-      rating: 4.5,
-    },
-  ];
+
+  const { products } = useProducts();
+  const images = products[0]?.ProductImage;
+  const carouselProduct = [products[0]];
+
   const [value, setValue] = useState(1);
   const handleChange = (event, newValue) => {
     setValue(newValue);
@@ -124,7 +100,6 @@ const Dashboard = () => {
 
   return (
     <>
-      <EcoFriendlyNavbar />
       <Box
         sx={{
           display: 'flex',
@@ -142,7 +117,7 @@ const Dashboard = () => {
         >
           {/* Carousel Section */}
           <Grid item xs={12} md={8}>
-            <EmblaCarousel slides={images} />
+            <EmblaCarousel slides={images} product={carouselProduct} />
           </Grid>
 
           {/* Promotions and About Us Section */}
@@ -260,11 +235,11 @@ const Dashboard = () => {
             <TabPanel value={value} index={1}>
               <Grid container spacing={2}>
                 {products.map((product) => (
-                  <Grid item xs={12} sm={6} md={4} key={product.id}>
+                  <Grid item xs={12} sm={6} md={4} key={product._id}>
                     <ShopCard
                       label={product.label}
-                      image={product.image}
-                      title={product.title}
+                      image={product.ProductImage[0]}
+                      title={product.productName}
                       price={product.price}
                     />
                   </Grid>
