@@ -27,7 +27,11 @@ const Layout = ({ children }) => {
         }}
       >
         <Navbar />
-        {role === 'user' || null ? <EcoFriendlyNavbar /> : <></>}
+        {role === 'user' || null ? (
+          <EcoFriendlyNavbar />
+        ) : (
+          <Box sx={{ p: 0.5 }}></Box>
+        )}
       </Box>
 
       <Box
