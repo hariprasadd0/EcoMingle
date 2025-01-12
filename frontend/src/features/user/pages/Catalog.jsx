@@ -1,11 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { useProducts } from '../hooks/useProducts.jsx';
 import {
   Box,
   Card,
-  CardContent,
   Checkbox,
   Typography,
   Grid,
@@ -15,26 +14,46 @@ import {
   Select,
   MenuItem,
   Button,
-  CircularProgress,
+  Alert,
+  Snackbar,
+  IconButton,
+  AlertTitle,
+  Skeleton,
 } from '@mui/material';
 import { IoIosArrowDown } from 'react-icons/io';
 import { addToCart } from '../cartSlice.js';
+import ShopCard from '../components/ShopCard';
+import { LuLayoutGrid, LuLayoutList, LuRefreshCw } from 'react-icons/lu';
+import { addToWishlist } from '../api/wishlistApi.js';
 
 const useCategories = () => {
   const { products } = useProducts();
-  const categories = products.map((item, index) => ({
-    id: index,
-    name: item.category,
-  }));
 
-  const materials = products.map((item, index) => ({
-    id: index,
-    name: item.material,
-  }));
+  const categories = useMemo(() => {
+    const uniqueCategories = [
+      ...new Set(products.map((item) => item.category)),
+    ];
+
+    return uniqueCategories.map((name, index) => ({ id: index, name }));
+  }, [products]);
+
+  const materials = useMemo(() => {
+    const uniqueMaterials = [...new Set(products.map((item) => item.material))];
+    return uniqueMaterials.map((name, index) => ({ id: index, name }));
+  }, [products]);
+
   return { categories, materials };
 };
 
-// Sidebar for Filters
+const FilterSection = ({ title, children }) => (
+  <Box sx={{ mb: 3 }}>
+    <Typography variant="h6" fontSize={16} fontWeight="medium" sx={{ mb: 2 }}>
+      {title}
+    </Typography>
+    {children}
+  </Box>
+);
+
 const SideNav = ({
   selectedCategories,
   toggleCategory,
@@ -136,15 +155,6 @@ const SideNav = ({
   );
 };
 
-const FilterSection = ({ title, children }) => (
-  <Box sx={{ mb: 3 }}>
-    <Typography variant="h6" fontSize={16} fontWeight="medium" sx={{ mb: 2 }}>
-      {title}
-    </Typography>
-    {children}
-  </Box>
-);
-
 const AppliedFilters = ({
   selectedCategories,
   selectedMaterials,
@@ -200,73 +210,178 @@ const SortBy = ({ sortBy, setSortBy }) => {
 const ProductGrid = ({ products, loading, error }) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const [viewMode, setViewMode] = useState('grid');
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
 
-  if (loading) return <CircularProgress />;
-  if (error) return <Typography color="error">{error}</Typography>;
-  if (products.length === 0) {
-    return (
-      <Typography variant="h6" color="text.secondary" textAlign="center" mt={4}>
-        No products found
-      </Typography>
-    );
-  }
   const handleAddToCart = (id) => {
     const data = {
       productId: id,
       quantity: 1,
     };
-
     dispatch(addToCart(data));
+    setSnackbarOpen(true);
   };
 
-  return (
-    <Grid container spacing={2}>
-      {products.map((product) => (
-        <Grid item xs={12} sm={6} md={4} key={product._id}>
-          <Card sx={{ cursor: 'pointer' }}>
-            <CardContent onClick={() => navigate(`/product/${product._id}`)}>
-              <img
-                src={product.ProductImage[0]}
-                alt={product.productName}
-                style={{ width: '100%', height: 200, objectFit: 'cover' }}
+  const handleAddToWishlist = (id) => {
+    addToWishlist(id);
+    setSnackbarOpen(true);
+  };
+
+  if (loading) {
+    return (
+      <Grid container spacing={3}>
+        {[1, 2, 3, 4, 5, 6].map((item) => (
+          <Grid item xs={12} sm={6} md={4} key={item}>
+            <Box sx={{ p: 2, border: '1px solid #eee', borderRadius: 2 }}>
+              <Skeleton
+                variant="rectangular"
+                height={200}
+                sx={{ borderRadius: 1 }}
               />
-              <Typography variant="h6" component="div">
-                {product.productName}
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                {product.label}
-              </Typography>
-              <Typography variant="h6" color="primary">
-                ${product.price}
-              </Typography>
-            </CardContent>
-            <Button
-              onClick={() => handleAddToCart(product._id)}
-              fullWidth
-              sx={{
-                backgroundColor: 'primary.main',
-                color: 'white',
-                my: 2,
-                '&:hover': {
-                  backgroundColor: 'primary.main',
-                },
-              }}
-            >
-              Add to Cart
-            </Button>
-          </Card>
-        </Grid>
-      ))}
-    </Grid>
+              <Skeleton height={32} sx={{ mt: 2 }} />
+              <Skeleton height={24} width="60%" />
+              <Skeleton height={32} width="40%" sx={{ mt: 1 }} />
+            </Box>
+          </Grid>
+        ))}
+      </Grid>
+    );
+  }
+
+  if (error) {
+    return (
+      <Alert
+        severity="error"
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          borderRadius: 2,
+          boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+        }}
+        action={
+          <Button color="error" size="small" startIcon={<LuRefreshCw />}>
+            Retry
+          </Button>
+        }
+      >
+        <AlertTitle>Error Loading Products</AlertTitle>
+        {error}
+      </Alert>
+    );
+  }
+
+  if (products.length === 0) {
+    return (
+      <Box
+        sx={{
+          textAlign: 'center',
+          py: 8,
+          px: 2,
+          bgcolor: '#f5f5f5',
+          borderRadius: 2,
+        }}
+      >
+        <Typography variant="h6" color="text.secondary" gutterBottom>
+          No Products Found
+        </Typography>
+        <Typography variant="body2" color="text.secondary" mb={3}>
+          Try adjusting your search or filters to find what you're looking for.
+        </Typography>
+        <Button
+          variant="outlined"
+          onClick={() => {
+            // Handle reset filters
+          }}
+        >
+          Reset Filters
+        </Button>
+      </Box>
+    );
+  }
+
+  return (
+    <Box>
+      {/* Grid Header */}
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          mb: 3,
+        }}
+      >
+        <Typography variant="h6" fontSize={14} component="div">
+          Showing {products.length} Products
+        </Typography>
+        <Box sx={{ display: 'flex', gap: 1 }}>
+          <IconButton
+            onClick={() => setViewMode('grid')}
+            color={viewMode === 'grid' ? 'primary' : 'default'}
+          >
+            <LuLayoutGrid />
+          </IconButton>
+          <IconButton
+            onClick={() => setViewMode('list')}
+            color={viewMode === 'list' ? 'primary' : 'default'}
+          >
+            <LuLayoutList />
+          </IconButton>
+        </Box>
+      </Box>
+
+      {/* Product Grid */}
+      <Grid container spacing={3}>
+        {products.map((product) => (
+          <Grid
+            item
+            xs={12}
+            sm={viewMode === 'list' ? 12 : 6}
+            md={viewMode === 'list' ? 12 : 4}
+            key={product._id}
+          >
+            <ShopCard
+              image={product.ProductImage[0]}
+              title={product.productName}
+              label={product.label}
+              price={`$${product.price}`}
+              rating={product.rating}
+              reviews={product.reviews}
+              description={product.description}
+              onClick={() => navigate(`/product/${product._id}`)}
+              onAddToCart={() => handleAddToCart(product._id)}
+              onAddToWishlist={() => handleAddToWishlist(product._id)}
+              isNew={product.isNew}
+              discount={product.discount}
+              oldPrice={product.oldPrice}
+            />
+          </Grid>
+        ))}
+      </Grid>
+
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={3000}
+        onClose={() => setSnackbarOpen(false)}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+      >
+        <Alert
+          onClose={() => setSnackbarOpen(false)}
+          severity="success"
+          variant="filled"
+          sx={{ width: '100%' }}
+        >
+          Product added to cart
+        </Alert>
+      </Snackbar>
+    </Box>
   );
 };
 
 const Catalog = () => {
   const { category } = useParams();
-
+  const navigate = useNavigate();
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [selectedMaterials, setSelectedMaterials] = useState([]);
-
   const [sortBy, setSortBy] = useState('price');
   const [priceRange, setPriceRange] = useState([0, 100]);
   const { products, status, error, setCategory } = useProducts();
@@ -275,23 +390,74 @@ const Catalog = () => {
   const searchParams = new URLSearchParams(location.search);
   const searchQuery = searchParams.get('search');
 
+  const filteredAndSortedProducts = useMemo(() => {
+    let filtered = [...products];
+
+    if (searchQuery) {
+      const searchLower = searchQuery.toLowerCase();
+      filtered = filtered.filter((product) =>
+        product.productName.toLowerCase().includes(searchLower),
+      );
+    }
+    // Apply category filter
+    if (selectedCategories.length > 0) {
+      filtered = filtered.filter((product) =>
+        selectedCategories.includes(product.category),
+      );
+    }
+
+    // Apply material filter
+    if (selectedMaterials.length > 0) {
+      filtered = filtered.filter((product) =>
+        selectedMaterials.includes(product.material),
+      );
+    }
+
+    // Apply price range filter
+    filtered = filtered.filter(
+      (product) =>
+        product.price >= priceRange[0] && product.price <= priceRange[1],
+    );
+
+    // Apply sorting
+    return filtered.sort((a, b) => {
+      switch (sortBy) {
+        case 'price':
+          return a.price - b.price;
+        case 'popularity':
+          return b.popularity - a.popularity;
+        case 'rating':
+          return b.rating - a.rating;
+        default:
+          return 0;
+      }
+    });
+  }, [
+    products,
+    selectedCategories,
+    selectedMaterials,
+    priceRange,
+    sortBy,
+    searchQuery,
+  ]);
+
   useEffect(() => {
     if (!searchQuery && !category) {
       setCategory(null);
     } else if (searchQuery) {
       setCategory([searchQuery]);
-    } else {
+    } else if (category) {
+      setSelectedCategories([category]);
       setCategory(category);
     }
-  }, [searchQuery, setCategory, category]);
+  }, [searchQuery, category, setCategory]);
 
-  const toggleCategory = (category) => {
+  const toggleCategory = (categoryName) => {
     setSelectedCategories((prev) =>
-      prev.includes(category)
-        ? prev.filter((item) => item !== category)
-        : [...prev, category],
+      prev.includes(categoryName)
+        ? prev.filter((item) => item !== categoryName)
+        : [...prev, categoryName],
     );
-    setCategory([...selectedCategories, category]);
   };
 
   const toggleMaterial = (material) => {
@@ -300,16 +466,18 @@ const Catalog = () => {
         ? prev.filter((item) => item !== material)
         : [...prev, material],
     );
-
-    console.log(material);
   };
 
   const handleDeleteFilter = (label, filterType) => {
-    if (filterType === 'category')
+    if (filterType === 'category') {
       setSelectedCategories((prev) => prev.filter((item) => item !== label));
-
-    if (filterType === 'material')
+      if (category || searchQuery) {
+        setCategory(null);
+      }
+    }
+    if (filterType === 'material') {
       setSelectedMaterials((prev) => prev.filter((item) => item !== label));
+    }
   };
 
   return (
@@ -332,7 +500,7 @@ const Catalog = () => {
           <SortBy sortBy={sortBy} setSortBy={setSortBy} />
         </Box>
         <ProductGrid
-          products={products}
+          products={filteredAndSortedProducts}
           loading={status === 'loading'}
           error={error}
         />
