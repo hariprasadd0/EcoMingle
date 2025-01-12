@@ -14,6 +14,12 @@ export const useProducts = () => {
   };
 
   useEffect(() => {
+    if (products.length === 0) {
+      dispatch(getProductsThunk());
+    }
+  }, [dispatch, products.length]);
+
+  useEffect(() => {
     if (category) {
       fetchProductsByCategory(category);
     } else {
