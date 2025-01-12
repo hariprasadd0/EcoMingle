@@ -38,6 +38,10 @@ const productItemSchema = new mongoose.Schema(
     SKU: { type: String, unique: true, required: true },
     inventoryCount: { type: Number, required: true },
     discount: { type: Number, default: 0 },
+    oldPrice: { type: Number },
+    newPrice: { type: Number, required: true },
+    promotionCategory: { type: String },
+    promotionActive: { type: Boolean, default: false },
   },
   { timestamps: true },
 );
