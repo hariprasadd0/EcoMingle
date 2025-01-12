@@ -43,7 +43,7 @@ const EmblaCarousel = (props) => {
     dispatch(addToCart(data));
   };
   if (!slides || !product) {
-    return <div>d</div>;
+    return <div></div>;
   }
 
   return (
@@ -77,6 +77,7 @@ const EmblaCarousel = (props) => {
             </Typography>
             <Box>
               <img
+                loading="lazy"
                 width={'320px'}
                 height={'310px'}
                 src={item.ProductImage[0]}
@@ -106,8 +107,14 @@ const EmblaCarousel = (props) => {
                   size="small"
                   sx={{
                     borderRadius: '50%',
-                    border: '1px solid #2e7d32',
+                    border: '1px solid #00000015',
                     p: 1,
+                    transition: 'all 0.2s ease',
+                    ':hover': {
+                      backgroundColor: '#fce4ec',
+                      borderColor: '#e91e63',
+                      color: '#e91e63',
+                    },
                   }}
                 >
                   <LuHeart fontSize={20} strokeWidth={1.5} />
