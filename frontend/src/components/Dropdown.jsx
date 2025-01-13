@@ -122,7 +122,7 @@ function EcoFriendlyNavbar() {
                   }}
                 >
                   <Link
-                    to={`/catalog/${sub.toLowerCase().replace(/ /g, '-')}`}
+                    to={`/catalog/${sub.toLowerCase().replace(/ /g, '%20')}`}
                     style={{
                       textDecoration: 'none',
                       color: '#000',
