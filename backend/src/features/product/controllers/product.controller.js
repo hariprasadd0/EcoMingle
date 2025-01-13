@@ -12,11 +12,12 @@ import Vendor from '../../vendor/models/vendor.model.js';
 
 //get all product items
 const getAllProducts = asyncHandler(async (req, res) => {
-  const products = await Product.find();
+  const products = await Product.find().populate('productItems');
 
   if (!products) {
-    throw new ApiError(200, 'Products not found');
+    throw new ApiError(401, 'Products not found');
   }
+
   return res.status(200).json(new ApiResponse(200, { products }, 'Products'));
 });
 
@@ -28,52 +29,60 @@ const getProductById = asyncHandler(async (req, res) => {
 });
 
 const createProduct = asyncHandler(async (req, res) => {
-  const { productName, price, description, category } = req.body;
-  const vendor = req.user.id;
-
-  // Upload images
-  const imageUrls = [];
-  await Promise.all(
-    req.files.map(async (file) => {
-      const { path } = file;
-      const result = await uploadFile(path);
-      if (result && result.secure_url) {
-        imageUrls.push(result.secure_url);
-        if (fs.existsSync(path)) {
-          fs.unlink(path, (err) => {
-            if (err) {
-              console.error(`Error deleting file ${path}:`, err);
-            }
-          });
-        }
-      }
-    }),
-  );
-  if (imageUrls.length === 0) {
-    throw new ApiError(400, 'Image upload failed');
-  }
-
-  const product = new Product({
-    productName,
-    price,
-    description,
-    ProductImage: imageUrls,
-    category,
-    vendor,
-  });
-
   try {
-    await product.save();
+    const { productName, price, description, category, material } = req.body;
+
+    const vendor = req.user.id;
+
+    // Upload images
+    const imageUrls = [];
+
+    await Promise.all(
+      req.files.map(async (file) => {
+        const { path } = file;
+        const result = await uploadFile(path);
+        if (result && result.secure_url) {
+          imageUrls.push(result.secure_url);
+          if (fs.existsSync(path)) {
+            fs.unlink(path, (err) => {
+              if (err) {
+                console.error(`Error deleting file ${path}:`, err);
+              }
+            });
+          }
+        }
+      }),
+    );
+    if (imageUrls.length === 0) {
+      throw new ApiError(400, 'Image upload failed');
+    }
+
+    const product = new Product({
+      productName,
+      price,
+      description,
+      ProductImage: imageUrls,
+      category,
+      vendor,
+      material: material,
+    });
+    console.log('product', product);
+
+    try {
+      await product.save();
+    } catch (error) {
+      console.log(error);
+      throw new ApiError(400, error);
+    }
+    if (!product) {
+      throw new ApiError(400, 'Product not created');
+    }
+    return res
+      .status(200)
+      .json(new ApiResponse(200, { product }, 'Product created successfully'));
   } catch (error) {
     console.log(error);
-    throw new ApiError(400, error);
   }
-  if (!product) {
-    throw new ApiError(400, 'Product not created');
-  }
-  return res
-    .status(200)
-    .json(new ApiResponse(200, { product }, 'Product created successfully'));
 });
 
 const updateProduct = asyncHandler(async (req, res) => {
@@ -87,7 +96,7 @@ const updateProduct = asyncHandler(async (req, res) => {
   }
 
   // Product data via req.body
-  const { productName, price, description, category } = req.body;
+  const { productName, price, description, category, material } = req.body;
 
   const files = req.files;
   const imageUrls = [];
@@ -132,6 +141,7 @@ const updateProduct = asyncHandler(async (req, res) => {
   product.price = price || product.price;
   product.description = description || product.description;
   product.category = category ? category.toLowerCase() : product.category;
+  product.material = material ? material.toLowerCase() : product.material;
   // Update product images if new ones were uploaded
   if (imageUrls.length > 0) {
     product.ProductImage = imageUrls;
@@ -193,7 +203,9 @@ const getProductsByCategory = asyncHandler(async (req, res) => {
   if (!searchCategory) {
     throw new ApiError(400, 'Invalid category');
   }
-  const products = await Product.find({ category: { $regex: searchCategory } });
+  const products = await Product.find({
+    category: { $regex: searchCategory },
+  }).populate('productItems');
 
   if (!products) {
     throw new ApiError(404, 'Products not found');
@@ -251,6 +263,9 @@ const addToCart = asyncHandler(async (req, res) => {
     let cart = await Cart.findOne({ user: userId });
 
     let vendor = await Vendor.findById(product.vendor);
+    if (!vendor) {
+      throw new ApiError(400, 'vendor not found');
+    }
 
     if (!cart) {
       cart = new Cart({
