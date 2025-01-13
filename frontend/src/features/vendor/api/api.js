@@ -50,3 +50,10 @@ export const deleteProduct = async (id) => {
 export const logout = async () => {
   return await api.post('/user/logout', { skipInterceptor: true });
 };
+
+export const createProductItem = async (data, id) => {
+  return await api.post(`vendor/create-item/${id}`, data);
+};
+export const updatedProductItem = async (data, id) => {
+  return await api.patch(`/create-item/${id}`, data);
+};
