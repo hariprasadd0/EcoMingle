@@ -135,7 +135,7 @@ export default function PrimarySearchAppBar() {
       <MenuItem disableRipple>
         <IconButton
           size="medium"
-          aria-label="show 17 new notifications"
+          aria-label=" new notifications"
           color="inherit"
         >
           <Badge
@@ -188,8 +188,21 @@ export default function PrimarySearchAppBar() {
             minHeight: '50px',
           }}
         >
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <img src={logo} alt="logo" width={80} height={50} />
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              cursor: 'pointer',
+            }}
+          >
+            <img
+              onClick={() => navigate('/dashboard')}
+              src={logo}
+              alt="logo"
+              width={80}
+              height={50}
+            />
           </Box>
           <Box
             sx={{
@@ -209,8 +222,6 @@ export default function PrimarySearchAppBar() {
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') {
                       e.preventDefault();
-                      console.log(e.key);
-
                       handleSubmit();
                     }
                   }}
@@ -289,6 +300,19 @@ export default function PrimarySearchAppBar() {
                 ) : (
                   <div></div>
                 )}
+                <IconButton
+                  size="medium"
+                  aria-label=" new notifications"
+                  color="inherit"
+                >
+                  <Badge
+                    badgeContent={cartCount}
+                    color="error"
+                    sx={{ '& .MuiBadge-badge': { fontSize: '10px' } }}
+                  >
+                    <NotificationsOutlinedIcon />
+                  </Badge>
+                </IconButton>
                 {notAllowed ? (
                   <div></div>
                 ) : (
@@ -321,8 +345,9 @@ export default function PrimarySearchAppBar() {
                 >
                   <LuUserCircle fontSize={22} strokeWidth={1.5} />
                 </IconButton>
+
                 {notAllowed ? (
-                  <div></div>
+                  <></>
                 ) : (
                   <IconButton
                     size="large"
