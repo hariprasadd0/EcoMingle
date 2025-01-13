@@ -5,7 +5,6 @@ import {
   isVendor,
 } from '../../../middleware/auth.middleware.js';
 import {
-  getAllProducts,
   createProduct,
   updateProduct,
   deleteProduct,
@@ -70,9 +69,9 @@ router.delete('/products/:pId', verifyJwt, isVendor, deleteProduct);
 
 //product items
 router.get('/product/:id', verifyJwt, isVendor, getProductById);
-router.post('/create-item', verifyJwt, isVendor, createProductItem);
+router.post('/create-item/:id', verifyJwt, isVendor, createProductItem);
 router.get('/products/:vId', verifyJwt, isVendor, getVendorProducts);
-router.patch('/update-item/:pId', verifyJwt, isVendor, updateProductItem);
+router.patch('/create-item/:pId', verifyJwt, isVendor, updateProductItem);
 router.delete('/delete-item/:pId', verifyJwt, isVendor, deleteProductItem);
 
 export default router;
