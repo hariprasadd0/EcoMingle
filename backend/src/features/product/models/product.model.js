@@ -39,7 +39,7 @@ const productItemSchema = new mongoose.Schema(
     inventoryCount: { type: Number, required: true },
     discount: { type: Number, default: 0 },
     oldPrice: { type: Number },
-    newPrice: { type: Number, required: true },
+    newPrice: { type: Number },
     promotionCategory: { type: String },
     promotionActive: { type: Boolean, default: false },
   },
