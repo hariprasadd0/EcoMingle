@@ -4,25 +4,32 @@ import { ApiError } from '../../../utils/ApiError.js';
 import { ApiResponse } from '../../../utils/ApiResponse.js';
 
 const createProductItem = asyncHandler(async (req, res) => {
-  const { SKU, productId, inventoryCount } = req.body;
+  const { id } = req.params;
 
-  // Validate input
-  if (!productId || !SKU || !Number.isInteger(inventoryCount)) {
-    throw new ApiError(
-      400,
-      'Please provide all required values (productId, SKU, inventoryCount)',
-    );
-  }
+  const {
+    SKU,
+    inventoryCount,
+    discount,
+    oldPrice,
+    newPrice,
+    promotionCategory,
+    promotionActive,
+  } = req.body;
 
   // Create new ProductItem
   const newProductItem = await ProductItem.create({
-    productId,
+    productId: id,
     SKU,
     inventoryCount,
+    discount,
+    oldPrice,
+    newPrice,
+    promotionCategory,
+    promotionActive,
   });
 
   // Find the associated product
-  const product = await Product.findById(productId);
+  const product = await Product.findById(id);
 
   if (!product) {
     throw new ApiError(404, 'Product not found');
@@ -34,9 +41,7 @@ const createProductItem = asyncHandler(async (req, res) => {
   await product.save();
 
   // Get the updated product with populated productItems
-  const updatedProduct = await Product.findById(productId).populate(
-    'productItems',
-  );
+  const updatedProduct = await Product.findById(id).populate('productItems');
 
   return res
     .status(200)
@@ -51,13 +56,28 @@ const createProductItem = asyncHandler(async (req, res) => {
 //update product item
 const updateProductItem = asyncHandler(async (req, res) => {
   const { id } = req.params;
-  const { SKU, inventoryCount } = req.body;
+  const {
+    SKU,
+    inventoryCount,
+    discount,
+    oldPrice,
+    newPrice,
+    promotionCategory,
+    promotionActive,
+  } = req.body;
   const productItem = await ProductItem.findById(id);
   if (!productItem) {
     throw new ApiError(404, 'Product item not found');
   }
   productItem.SKU = SKU || productItem.SKU;
   productItem.inventoryCount = inventoryCount || productItem.inventoryCount;
+  productItem.discount = discount || productItem.discount;
+  productItem.oldPrice = oldPrice || productItem.oldPrice;
+  productItem.newPrice = newPrice || productItem.newPrice;
+  productItem.promotionCategory =
+    promotionCategory || productItem.promotionCategory;
+  productItem.promotionActive = promotionActive || productItem.promotionActive;
+
   await productItem.save();
   const updatedProductItem = await ProductItem.findById(id);
   return res
