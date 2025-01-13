@@ -331,31 +331,32 @@ const ProductGrid = ({ products, loading, error }) => {
 
       {/* Product Grid */}
       <Grid container spacing={3}>
-        {products.map((product) => (
-          <Grid
-            item
-            xs={12}
-            sm={viewMode === 'list' ? 12 : 6}
-            md={viewMode === 'list' ? 12 : 4}
-            key={product._id}
-          >
-            <ShopCard
-              image={product.ProductImage[0]}
-              title={product.productName}
-              label={product.label}
-              price={`$${product.price}`}
-              rating={product.rating}
-              reviews={product.reviews}
-              description={product.description}
-              onClick={() => navigate(`/product/${product._id}`)}
-              onAddToCart={() => handleAddToCart(product._id)}
-              onAddToWishlist={() => handleAddToWishlist(product._id)}
-              isNew={product.isNew}
-              discount={product.discount}
-              oldPrice={product.oldPrice}
-            />
-          </Grid>
-        ))}
+        {products.map((product) => {
+          const productItem = product.productItems?.[0];
+          return (
+            <Grid
+              item
+              xs={12}
+              sm={viewMode === 'list' ? 12 : 6}
+              md={viewMode === 'list' ? 12 : 4}
+              key={product._id}
+            >
+              <ShopCard
+                image={product.ProductImage[0]}
+                title={product.productName}
+                label={product.label}
+                price={`$${productItem?.newPrice || product.price}`}
+                rating={product.rating}
+                reviews={product.reviews}
+                description={product.description}
+                onClick={() => navigate(`/product/${product._id}`)}
+                onAddToCart={() => handleAddToCart(product._id)}
+                onAddToWishlist={() => handleAddToWishlist(product._id)}
+                discount={productItem?.discount || null}
+              />
+            </Grid>
+          );
+        })}
       </Grid>
 
       <Snackbar
