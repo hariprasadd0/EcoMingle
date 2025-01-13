@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Grid,
   Card,
@@ -10,11 +10,12 @@ import {
   Tabs,
 } from '@mui/material';
 import CustomTab from '../components/CustomTab';
-import Brush from '../../../assets/images/brush.svg';
 import EmblaCarousel from '../components/carousel';
 import eco from '../../../assets/images/eco.mp4';
 import ShopCard from '../components/ShopCard';
 import { useProducts } from '../hooks/useProducts';
+import { useNavigate } from 'react-router-dom';
+import Loader from '../../../components/Loader';
 
 function TabPanel({ children, value, index }) {
   return (
@@ -38,11 +39,12 @@ function TabPanel({ children, value, index }) {
 }
 
 const Dashboard = () => {
+  const navigate = useNavigate();
   const natureMeetsCraftItems = [
     {
       name: 'Desk Organiser',
       image:
-        'https://images.unsplash.com/photo-1591488320449-011701bb6704?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
+        'https://plus.unsplash.com/premium_photo-1706544427197-30f45dd5ba1f?q=80&w=1917&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
       price: '$29.99',
       description: 'Sleek wooden desk organizer for a tidy workspace',
     },
@@ -82,14 +84,9 @@ const Dashboard = () => {
       description: 'Wooden MagSafe compatible phone stand',
     },
   ];
-  const nature = [
-    'https://i.postimg.cc/5NfPvhGL/Baskets.png',
-    'https://i.postimg.cc/9F1LBx5S/chair.png ',
-    'https://i.postimg.cc/RZFXpcv0/organiser.png ',
-    'https://i.postimg.cc/13jMkfzr/Pot.png',
-  ];
 
-  const { products } = useProducts();
+  const { products, status } = useProducts();
+
   const images = products[0]?.ProductImage;
   const carouselProduct = [products[0]];
 
@@ -97,6 +94,10 @@ const Dashboard = () => {
   const handleChange = (event, newValue) => {
     setValue(newValue);
   };
+
+  if (!products || status === 'pending') {
+    return <Loader />;
+  }
 
   return (
     <>
@@ -122,21 +123,48 @@ const Dashboard = () => {
 
           {/* Promotions and About Us Section */}
           <Grid item xs={12} md={4}>
-            <Grid container direction="column" spacing={2}>
+            <Grid container direction="column" spacing={1}>
               <Grid item>
                 <Card
                   elevation={0}
-                  sx={{ boxShadow: 'none', p: 2 }}
+                  sx={{
+                    boxShadow: 'none',
+                    px: 2,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: 1,
+                  }}
                   variant="outlined"
                 >
-                  <Chip label="Promotions" variant="outlined" />
+                  <Chip
+                    label="Promotions"
+                    variant="outlined"
+                    sx={{
+                      width: '100px',
+                      mt: 1,
+                    }}
+                  />
+
+                  <img
+                    src="https://images.unsplash.com/photo-1577058109956-67adf6edc586?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8N3x8ZWNvJTIwZnJpZW5kbHklMjBjb3NtZXRpY3N8ZW58MHx8MHx8fDA%3D"
+                    alt="Electronics promotion"
+                    style={{
+                      width: '100%',
+                      height: '18vh',
+                      objectFit: 'cover',
+                      borderRadius: '4px',
+                    }}
+                  />
+
                   <CardContent
                     sx={{
                       display: 'flex',
                       flexDirection: 'column',
-                      flexGrow: 1,
-                      flexShrink: 1,
-                      p: 2,
+                      gap: 0.5,
+                      p: 0,
+                      '&:last-child': {
+                        pb: 0,
+                      },
                     }}
                   >
                     <Typography
@@ -148,21 +176,12 @@ const Dashboard = () => {
                     </Typography>
                     <Typography
                       variant="body1"
-                      fontSize={24}
+                      fontSize={20}
                       color={'text.primary'}
                     >
                       15% Discount for all Electronics
                     </Typography>
                   </CardContent>
-                  <img
-                    src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=870&q=80"
-                    alt="Electronics promotion"
-                    style={{
-                      width: '100%',
-                      height: '10vh',
-                      objectFit: 'cover',
-                    }}
-                  />
                 </Card>
               </Grid>
               <Grid item>
@@ -234,16 +253,26 @@ const Dashboard = () => {
           <Box sx={{ width: '100%' }}>
             <TabPanel value={value} index={1}>
               <Grid container spacing={2}>
-                {products.map((product) => (
-                  <Grid item xs={12} sm={6} md={4} key={product._id}>
-                    <ShopCard
-                      label={product.label}
-                      image={product.ProductImage[0]}
-                      title={product.productName}
-                      price={product.price}
-                    />
-                  </Grid>
-                ))}
+                {products.map((product) => {
+                  const productItem = product.productItems?.[0];
+                  return (
+                    <Grid item xs={12} sm={6} md={4} key={product._id}>
+                      <ShopCard
+                        label={productItem?.promotionCategory}
+                        image={product.ProductImage[0]}
+                        title={product.productName}
+                        price={`$${productItem?.newPrice || product.price}`}
+                        oldPrice={
+                          productItem?.oldPrice
+                            ? `$${productItem.oldPrice}`
+                            : null
+                        }
+                        discount={productItem?.discount || null}
+                        onClick={() => navigate(`/product/${product._id}`)}
+                      />
+                    </Grid>
+                  );
+                })}
               </Grid>
             </TabPanel>
             <TabPanel value={value} index={2}>
@@ -255,49 +284,55 @@ const Dashboard = () => {
           </Box>
         </Box>
         {/* Nature Meets Art */}
+
         <Box
           sx={{
             display: 'flex',
             flexDirection: 'column',
             width: '100%',
-            px: 2,
+            px: { xs: 2, md: 4 },
             mt: 4,
+            mb: 6,
           }}
         >
-          <Typography variant="h5" fontSize={24} color="text.primary" mb={3}>
-            Nature Meets Craft
-          </Typography>
+          <Box
+            sx={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              mb: 4,
+            }}
+          >
+            <Box>
+              <Typography
+                variant="h5"
+                fontSize={24}
+                color="text.primary"
+                mb={1}
+              >
+                Nature Meets Craft
+              </Typography>
+              <Typography variant="body1" color="text.secondary">
+                Handcrafted pieces that bring nature's beauty to your space
+              </Typography>
+            </Box>
+            <Button variant="outlined" color="primary">
+              View All
+            </Button>
+          </Box>
+
           <Grid container spacing={3}>
             {natureMeetsCraftItems.map((item, index) => (
               <Grid item xs={12} sm={6} md={4} key={index}>
-                <Card
-                  elevation={0}
-                  sx={{ boxShadow: 'none', border: '1px solid #e0e0e0' }}
-                >
-                  <CardContent
-                    sx={{
-                      p: 2,
-                      display: 'flex',
-                      flexDirection: 'column',
-                      alignItems: 'center',
-                    }}
-                  >
-                    <Box
-                      sx={{
-                        width: '100%',
-                        height: 200,
-                        backgroundImage: `url(${item.image})`,
-                        backgroundSize: 'contain',
-                        backgroundPosition: 'center',
-                        backgroundRepeat: 'no-repeat',
-                        mb: 2,
-                      }}
-                    />
-                    <Typography variant="subtitle1" align="center">
-                      {item.name}
-                    </Typography>
-                  </CardContent>
-                </Card>
+                <ShopCard
+                  image={item.image}
+                  title={item.name}
+                  price={`${item.price}`}
+                  description={item.description}
+                  // onClick={() => navigate(`/product/${product._id}`)}
+                  // onAddToCart={() => handleAddToCart(product._id)}
+                  // onAddToWishlist={() => handleAddToWishlist(product._id)}
+                />
               </Grid>
             ))}
           </Grid>
