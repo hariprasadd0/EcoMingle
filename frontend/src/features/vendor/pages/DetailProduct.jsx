@@ -1,6 +1,11 @@
 import { useNavigate, useParams } from 'react-router-dom';
 import { useEffect, useState } from 'react';
-import { getProductDetails, updateProduct, deleteProduct } from '../api/api';
+import {
+  getProductDetails,
+  updateProduct,
+  deleteProduct,
+  createProductItem,
+} from '../api/api.js';
 import {
   Card,
   CardContent,
@@ -15,19 +20,28 @@ import {
   Alert,
   Snackbar,
   CircularProgress,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
 } from '@mui/material';
 import DialogBox from '../components/DialogBox';
-import { Add, RemoveCircle } from '@mui/icons-material';
+import { Add, Delete, RemoveCircle } from '@mui/icons-material';
+import ProductItemDialog from '../components/ProductItemDialog.jsx';
+
 const DetailProduct = () => {
   const navigate = useNavigate();
   const { id } = useParams();
   const [product, setProduct] = useState(null);
   const [open, setOpen] = useState(false);
+  const [openItemDialog, setOpenItemDialog] = useState(false);
+  const [openAlertDialog, setOpenAlertDialog] = useState(false);
   const [loading, setLoading] = useState(false);
   const [update, setUpdate] = useState(false);
+  const [updateMessage, setUpdateMessage] = useState('');
 
   useEffect(() => {
-    // Fetch product details based on the id
     const fetchProductDetails = async () => {
       try {
         setLoading(true);
@@ -41,6 +55,7 @@ const DetailProduct = () => {
     };
     fetchProductDetails();
   }, [id, update]);
+
   const [selectedImage, setSelectedImage] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const productItem = product?.productItems[0];
@@ -66,22 +81,45 @@ const DetailProduct = () => {
     const value = Math.max(1, Math.min(newValue, productItem.inventoryCount));
     setQuantity(value);
   };
+
   const handleUpdateProduct = async (data) => {
     setLoading(true);
     const res = await updateProduct(data, id);
-    console.log(res);
     setLoading(false);
     if (res.status === 200) {
       setUpdate(true);
+      setUpdateMessage('Product updated successfully');
     }
     setOpen(false);
+  };
+
+  const handleUpdateProductItem = async (data) => {
+    setLoading(true);
+    try {
+      const res = await createProductItem(data, product._id);
+      console.log(res);
+
+      if (res.status === 200) {
+        setUpdate(true);
+        setUpdateMessage('Product item updated successfully');
+      }
+    } catch (error) {
+      setUpdateMessage('Error updating product item');
+    }
+    setLoading(false);
+    setOpenItemDialog(false);
+  };
+
+  const handleDeleteAlertOpen = () => {
+    setOpenAlertDialog(true);
+  };
+  const handleDeleteAlertClose = () => {
+    setOpenAlertDialog(false);
   };
   const handleDeleteProduct = async () => {
     try {
       setLoading(true);
       const res = await deleteProduct(id);
-      console.log(res);
-
       if (res.status === 200) {
         navigate('/products', { replace: true });
       }
@@ -91,7 +129,8 @@ const DetailProduct = () => {
       throw new Error('Error deleting product');
     }
   };
-  const fields = [
+
+  const productFields = [
     { name: 'productName', label: 'Product Name', required: true },
     { name: 'price', label: 'Price', type: 'number', required: true },
     { name: 'description', label: 'Description', multiline: true, rows: 4 },
@@ -107,6 +146,7 @@ const DetailProduct = () => {
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString();
   };
+
   return (
     <Card sx={{ maxWidth: 1200, mx: 'auto', mt: 4 }}>
       {update && (
@@ -115,7 +155,7 @@ const DetailProduct = () => {
           autoHideDuration={3000}
           onClose={() => setUpdate(false)}
         >
-          <Alert severity="success">Product updated successfully</Alert>
+          <Alert severity="success">{updateMessage}</Alert>
         </Snackbar>
       )}
       {product && (
@@ -164,14 +204,53 @@ const DetailProduct = () => {
               <Box
                 sx={{ display: 'flex', justifyContent: 'space-between', mt: 2 }}
               >
-                <Typography variant="h5">{product.productName}</Typography>
-
-                <Chip
-                  label={product.category}
-                  variant="filled"
+                {' '}
+                <Box>
+                  <Typography variant="h5">{product.productName}</Typography>
+                  <Chip
+                    label={product.category}
+                    variant="filled"
+                    size="small"
+                    sx={{ mb: 2 }}
+                  />
+                </Box>
+                <IconButton
+                  onClick={handleDeleteAlertOpen}
                   size="small"
-                  sx={{ mb: 2 }}
-                />
+                  sx={{ width: '50px', height: '50px' }}
+                >
+                  <Delete color="error" />
+                </IconButton>
+                <Dialog
+                  open={openAlertDialog}
+                  onClose={handleDeleteAlertClose}
+                  aria-labelledby="alert-dialog-title"
+                  aria-describedby="alert-dialog-description"
+                >
+                  <DialogTitle id="alert-dialog-title">
+                    {'Are You Sure to Delete?'}
+                  </DialogTitle>
+                  <DialogContent>
+                    <DialogContentText id="alert-dialog-description">
+                      By agreeing to delete{' '}
+                      <span style={{ color: 'black' }}>
+                        {product.productName}
+                      </span>
+                      , you will permanently remove it from the inventory. This
+                      action cannot be undone.
+                    </DialogContentText>
+                  </DialogContent>
+                  <DialogActions>
+                    <Button onClick={handleDeleteAlertClose}>cancel</Button>
+                    <Button
+                      color="error"
+                      onClick={handleDeleteProduct}
+                      autoFocus
+                    >
+                      Delete
+                    </Button>
+                  </DialogActions>
+                </Dialog>
               </Box>
               <Typography variant="h6" sx={{ mb: 2 }}>
                 ${product.price.toFixed(2)}
@@ -229,10 +308,20 @@ const DetailProduct = () => {
                 <Typography variant="body2">
                   Last Updated: {formatDate(product.updatedAt)}
                 </Typography>
+                {productItem?.promotionActive && (
+                  <Typography variant="body2" color="success.main">
+                    Active Promotion: {productItem.promotionCategory}
+                  </Typography>
+                )}
+                {productItem?.discount > 0 && (
+                  <Typography variant="body2" color="error.main">
+                    Discount: {productItem.discount}%
+                  </Typography>
+                )}
               </Stack>
 
-              {/* Add to Cart Button */}
-              <Box sx={{ display: 'flex', gap: 2 }}>
+              {/* Buttons */}
+              <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
                 <Button
                   variant="contained"
                   size="large"
@@ -241,28 +330,42 @@ const DetailProduct = () => {
                   disableRipple
                   onClick={() => setOpen(true)}
                 >
-                  update product
+                  Update Product
                 </Button>
 
                 <Button
                   variant="contained"
                   size="large"
-                  color="warning"
+                  color="info"
                   fullWidth
                   type="button"
                   disableRipple
-                  onClick={handleDeleteProduct}
+                  onClick={() => setOpenItemDialog(true)}
                 >
-                  delete product
+                  Update Product Item
                 </Button>
               </Box>
+
+              {/* Dialog Boxes */}
               <DialogBox
                 open={open}
                 onClose={() => setOpen(false)}
                 onSubmit={handleUpdateProduct}
-                fields={fields}
-                defaultValues={{ productName: '', price: '', description: '' }}
+                fields={productFields}
+                defaultValues={{
+                  productName: product.productName,
+                  price: product.price,
+                  description: product.description,
+                  category: product.category,
+                }}
                 Title="Update Product"
+              />
+
+              <ProductItemDialog
+                open={openItemDialog}
+                onClose={() => setOpenItemDialog(false)}
+                onSubmit={handleUpdateProductItem}
+                currentItem={productItem}
               />
             </Grid>
           </Grid>
