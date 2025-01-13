@@ -300,19 +300,7 @@ export default function PrimarySearchAppBar() {
                 ) : (
                   <div></div>
                 )}
-                <IconButton
-                  size="medium"
-                  aria-label=" new notifications"
-                  color="inherit"
-                >
-                  <Badge
-                    badgeContent={cartCount}
-                    color="error"
-                    sx={{ '& .MuiBadge-badge': { fontSize: '10px' } }}
-                  >
-                    <NotificationsOutlinedIcon />
-                  </Badge>
-                </IconButton>
+
                 {notAllowed ? (
                   <div></div>
                 ) : (
