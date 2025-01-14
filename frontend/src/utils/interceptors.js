@@ -22,9 +22,7 @@ api.interceptors.response.use(
       if (!isRefreshing) {
         isRefreshing = true;
         try {
-          console.log('Attempting to refresh token...');
           const { data } = await api.post('/user/refresh_token');
-          console.log('Refresh token success:', data);
           return api(originalConfig);
         } catch (_error) {
           localStorage.removeItem('user');

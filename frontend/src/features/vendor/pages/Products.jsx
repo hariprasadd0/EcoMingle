@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { getProducts } from '../api/api.js';
 import { useSelector } from 'react-redux';
 import ProductList from '../components/ProductList.jsx';
-import { Typography, Box, CircularProgress } from '@mui/material';
+import { Typography, Box } from '@mui/material';
 import { SearchAndFilter } from '../components/SearchAndFilter.jsx';
 import SearchInput from '../components/SearchInput';
 import FilterDropdown from '../components/FilterDropdown.jsx';
@@ -14,8 +14,6 @@ const Products = () => {
   const [products, setProducts] = useState([]);
 
   useEffect(() => {
-    console.log('Vendor ID:', vId);
-
     const fetchProducts = async () => {
       try {
         const response = await getProducts(vId);

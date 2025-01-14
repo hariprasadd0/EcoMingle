@@ -1,6 +1,7 @@
 import { Box } from '@mui/material';
 import Footer from '../components/footer';
 import Appbar from '../features/vendor/components/Appbar';
+
 const VendorLayout = ({ children }) => {
   return (
     <Box

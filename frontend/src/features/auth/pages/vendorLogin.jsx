@@ -9,7 +9,6 @@ const VendorLogin = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { isAuth } = useSelector((state) => state.vendor);
-  console.log(isAuth);
 
   const {
     register,

@@ -18,7 +18,6 @@ const vendorSchema = Joi.object({
   website: Joi.string().uri().optional().trim(),
   gstin: Joi.string().optional().trim(),
   pan: Joi.string().optional().trim(),
-  categories: Joi.array().items(Joi.string().trim()).optional(),
 });
 
 export default vendorSchema;

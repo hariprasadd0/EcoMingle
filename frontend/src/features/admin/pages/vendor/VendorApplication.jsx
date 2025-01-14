@@ -14,10 +14,13 @@ import { Link } from 'react-router-dom';
 
 const VendorApplication = () => {
   const [vendor, setVendor] = useState([]);
-  // Sample data for vendor applications
+  console.log(vendor);
+
   useEffect(() => {
     const vendorApplications = async () => {
       const res = await getVendorApplication();
+      console.log('res', res);
+
       setVendor(res.data?.data);
     };
     vendorApplications();
