@@ -43,11 +43,11 @@
   gap: 1.2rem;
   margin-top: 1px;
 }
-
 .embla__dots {
   display: flex;
   justify-content: flex-end;
-  gap: 2px;
+  gap: 0.5rem;
+  padding: 0.5rem;
 }
 
 .embla__dot {
@@ -62,25 +62,33 @@
   border: 0;
   padding: 0;
   margin: 0;
-  width: 1rem;
-  height: 1rem;
+  width: 1.2rem;
+  height: 1.2rem;
   align-items: center;
   justify-content: center;
   border-radius: 50%;
+  transition: all 0.3s ease;
 }
 
 .embla__dot:after {
-  background-color: rgb(234, 234, 234);
+  background-color: #eaeaea;
   width: 0.6rem;
   height: 0.6rem;
   border-radius: 50%;
   display: flex;
   align-items: center;
   content: '';
+  transition: all 0.3s ease;
+}
+
+.embla__dot:hover:after {
+  background-color: #d1d1d1;
+  transform: scale(1.2);
 }
 
 .embla__dot--selected:after {
-  outline: 1.5px solid #2e7d32;
+  background-color: #2e7d32;
+  outline: 2px solid rgba(46, 125, 50, 0.2);
   outline-offset: 2px;
 }
 
