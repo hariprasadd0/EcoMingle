@@ -3,6 +3,12 @@ import store from '../redux/store';
 import { logoutUser } from '../features/auth/authSlice';
 
 let isRefreshing = false;
+let refreshSubscribers = [];
+
+const processQueue = (error) => {
+  refreshSubscribers.forEach((callback) => callback(error));
+  refreshSubscribers = [];
+};
 
 api.interceptors.response.use(
   (response) => response,
@@ -17,37 +23,33 @@ api.interceptors.response.use(
       !originalConfig._retry &&
       !originalConfig.skipInterceptor
     ) {
-      originalConfig._retry = true;
-
       if (!isRefreshing) {
         isRefreshing = true;
-        try {
-          const { data } = await api.post('/user/refresh_token');
-          return api(originalConfig);
-        } catch (_error) {
-          localStorage.removeItem('user');
-          localStorage.removeItem('vendor');
-          localStorage.removeItem('admin');
-          store.dispatch(logoutUser());
 
-          return Promise.reject(_error);
+        try {
+          await api.post('/user/refresh_token');
+
+          processQueue(null);
+
+          return api(originalConfig);
+        } catch (refreshError) {
+          store.dispatch(logoutUser());
+          processQueue(refreshError);
+          return Promise.reject(refreshError);
         } finally {
           isRefreshing = false;
         }
       }
 
-      let retryCount = 0;
-      const maxRetries = 3;
-      while (isRefreshing && retryCount < maxRetries) {
-        await new Promise((resolve) => setTimeout(resolve, 100));
-        retryCount++;
-      }
-
-      if (retryCount === maxRetries) {
-        return Promise.reject(new Error('Timeout waiting for token refresh'));
-      }
-
-      return api(originalConfig);
+      return new Promise((resolve, reject) => {
+        refreshSubscribers.push((error) => {
+          if (error) {
+            reject(error);
+          } else {
+            resolve(api(originalConfig));
+          }
+        });
+      });
     }
 
     return Promise.reject(error);
