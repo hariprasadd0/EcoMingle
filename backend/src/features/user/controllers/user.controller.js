@@ -40,11 +40,15 @@ const registerUser = asyncHandler(async (req, res) => {
       httpOnly: true,
       secure: true,
       maxAge: 15 * 60 * 1000,
+      sameSite: 'none',
+      path: '/',
     };
     const refreshOptions = {
       httpOnly: true,
       secure: true,
       maxAge: 7 * 24 * 60 * 60 * 1000,
+      sameSite: 'none',
+      path: '/',
     };
     return res
       .status(201)
@@ -87,12 +91,15 @@ const loginUser = asyncHandler(async (req, res) => {
     httpOnly: true,
     secure: true,
     maxAge: 15 * 60 * 1000,
+    sameSite: 'none',
+    path: '/',
   };
   const refreshOptions = {
     httpOnly: true,
     secure: true,
     maxAge: 7 * 24 * 60 * 60 * 1000,
-    // path: '/refresh_token',
+    sameSite: 'none',
+    path: '/',
   };
   return res
     .status(200)
@@ -161,13 +168,16 @@ const refreshToken = asyncHandler(async (req, res) => {
       httpOnly: true,
       secure: true,
       maxAge: 15 * 60 * 1000,
+      sameSite: 'none',
+      path: '/',
     };
     const refreshToken = userOrVendor.generateRefreshToken();
     const refreshOptions = {
       httpOnly: true,
       secure: true,
       maxAge: 7 * 24 * 60 * 60 * 1000,
-      // path: '/refresh_token',
+      sameSite: 'none',
+      path: '/',
     };
     userOrVendor.refreshToken = refreshToken;
     await userOrVendor.save({ validateBeforeSave: false });
