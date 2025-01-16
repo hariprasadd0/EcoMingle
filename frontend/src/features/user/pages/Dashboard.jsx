@@ -106,15 +106,14 @@ const Dashboard = () => {
           display: 'flex',
           flexDirection: 'column',
           gap: 4,
-          mt: 1,
           width: '100%',
         }}
       >
         <Grid
           container
-          spacing={2}
+          spacing={1}
           px={{ xs: 2, md: 0 }}
-          sx={{ overflow: 'hidden' }}
+          sx={{ overflow: 'hidden', height: '85vh', display: 'flex' }}
         >
           {/* Carousel Section */}
           <Grid item xs={12} md={8}>
@@ -124,7 +123,7 @@ const Dashboard = () => {
           {/* Promotions and About Us Section */}
           <Grid item xs={12} md={4}>
             <Grid container direction="column" spacing={1}>
-              <Grid item>
+              <Grid item sx={{ flex: 1 }}>
                 <Card
                   elevation={0}
                   sx={{
@@ -141,7 +140,6 @@ const Dashboard = () => {
                     variant="outlined"
                     sx={{
                       width: '100px',
-                      mt: 1,
                     }}
                   />
 
@@ -150,7 +148,8 @@ const Dashboard = () => {
                     alt="Electronics promotion"
                     style={{
                       width: '100%',
-                      height: '18vh',
+                      maxHeight: '30vh',
+
                       objectFit: 'cover',
                       borderRadius: '4px',
                     }}
@@ -184,23 +183,23 @@ const Dashboard = () => {
                   </CardContent>
                 </Card>
               </Grid>
-              <Grid item>
+              <Grid item sx={{ flex: 1 }}>
                 <Card
                   elevation={0}
                   sx={{ boxShadow: 'none', p: 1.5 }}
                   variant="outlined"
                 >
                   <Chip label={'Who are we ?'} variant="outlined" />
-                  <Box sx={{ p: 0, mt: 3, flexGrow: 1, gap: 1 }}>
+                  <Box sx={{ p: 0, mt: 2, gap: 1 }}>
                     <video
                       src={eco}
                       autoPlay
                       controls
                       style={{
                         width: '100%',
-                        height: '160px',
                         backgroundColor: '#000',
                         borderRadius: '10px',
+                        maxHeight: '20vh',
                         objectFit: 'cover',
                       }}
                     >
@@ -213,7 +212,6 @@ const Dashboard = () => {
             </Grid>
           </Grid>
         </Grid>
-
         {/* Products Section */}
         <Box
           sx={{
@@ -284,7 +282,6 @@ const Dashboard = () => {
           </Box>
         </Box>
         {/* Nature Meets Art */}
-
         <Box
           sx={{
             display: 'flex',
