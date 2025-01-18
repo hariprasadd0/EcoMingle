@@ -10,21 +10,21 @@ import {
   Grid,
   Chip,
   Slider,
-  FormControl,
-  Select,
-  MenuItem,
+  useMediaQuery,
   Button,
   Alert,
   Snackbar,
   IconButton,
   AlertTitle,
   Skeleton,
+  useTheme,
+  Drawer,
 } from '@mui/material';
-import { IoIosArrowDown } from 'react-icons/io';
 import { addToCart } from '../cartSlice.js';
 import ShopCard from '../components/ShopCard';
 import { LuLayoutGrid, LuLayoutList, LuRefreshCw } from 'react-icons/lu';
 import { addToWishlist } from '../api/wishlistApi.js';
+import { Close, Tune } from '@mui/icons-material';
 
 const useCategories = () => {
   const { products } = useProducts();
@@ -61,8 +61,126 @@ const SideNav = ({
   toggleMaterial,
   priceRange,
   setPriceRange,
+  isMobile,
 }) => {
   const { categories, materials } = useCategories();
+  const [open, setOpen] = useState(false);
+  if (isMobile) {
+    return (
+      <>
+        <IconButton
+          sx={{
+            position: 'absolute',
+            zIndex: 2,
+            bgcolor: 'white',
+            top: '100px',
+            right: '20px',
+          }}
+          onClick={() => setOpen(true)}
+        >
+          <Tune />
+        </IconButton>
+
+        <Drawer
+          open={open}
+          PaperProps={{
+            sx: { borderRadius: 0 },
+          }}
+        >
+          <Box
+            sx={{
+              width: '100%',
+              display: 'flex',
+              flexDirection: 'row',
+              justifyContent: 'flex-end',
+            }}
+          >
+            <IconButton onClick={() => setOpen(false)}>
+              <Close />
+            </IconButton>
+          </Box>
+          <Card elevation={0} sx={{ boxShadow: 0 }}>
+            <FilterSection title="Product Type">
+              {categories.map((category) => (
+                <Box
+                  key={category.id}
+                  sx={{
+                    display: 'flex',
+                    gap: 1,
+                    alignItems: 'center',
+                    py: 1,
+                    cursor: 'pointer',
+                    borderBottom: '1px solid #e0e0e0',
+                  }}
+                >
+                  <Checkbox
+                    checked={selectedCategories.includes(category.name)}
+                    onChange={() => toggleCategory(category.name)}
+                    size="small"
+                  />
+                  <Typography variant="body2" fontSize={12} fontWeight={400}>
+                    {category.name}
+                  </Typography>
+                </Box>
+              ))}
+            </FilterSection>
+
+            <FilterSection title="Price">
+              <Box
+                sx={{
+                  display: 'flex',
+                  gap: 1,
+                  flexWrap: 'wrap',
+                  justifyContent: 'space-between',
+                  mt: 1,
+                }}
+              >
+                <Typography variant="body2" fontWeight="medium">
+                  ${priceRange[0]} - ${priceRange[1]}
+                </Typography>
+              </Box>
+              <Slider
+                value={priceRange}
+                onChange={(_, newValue) => setPriceRange(newValue)}
+                valueLabelDisplay="auto"
+                min={0}
+                max={100}
+                sx={{ mt: 2 }}
+              />
+            </FilterSection>
+
+            <FilterSection title="Materials">
+              {materials.length !== 0 ? (
+                <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mt: 1 }}>
+                  {materials
+                    .filter(
+                      (material) =>
+                        material.name && material.name.trim() !== '',
+                    )
+                    .map((material) => (
+                      <Chip
+                        key={material.id}
+                        label={material.name}
+                        clickable
+                        color={
+                          selectedMaterials.includes(material.name)
+                            ? 'primary'
+                            : 'default'
+                        }
+                        onClick={() => toggleMaterial(material.name)}
+                        size="small"
+                      />
+                    ))}
+                </Box>
+              ) : (
+                ''
+              )}
+            </FilterSection>
+          </Card>
+        </Drawer>
+      </>
+    );
+  }
   return (
     <Card
       elevation={2}
@@ -187,23 +305,6 @@ const AppliedFilters = ({
         ))}
       </Box>
     </Box>
-  );
-};
-
-const SortBy = ({ sortBy, setSortBy }) => {
-  return (
-    <FormControl sx={{ minWidth: 120 }} size="small">
-      <Select
-        value={sortBy}
-        onChange={(e) => setSortBy(e.target.value)}
-        displayEmpty
-        IconComponent={IoIosArrowDown}
-      >
-        <MenuItem value="price">Price</MenuItem>
-        <MenuItem value="popularity">Popularity</MenuItem>
-        <MenuItem value="rating">Rating</MenuItem>
-      </Select>
-    </FormControl>
   );
 };
 
@@ -380,13 +481,13 @@ const ProductGrid = ({ products, loading, error }) => {
 
 const Catalog = () => {
   const { category } = useParams();
-  const navigate = useNavigate();
+  const theme = useTheme();
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [selectedMaterials, setSelectedMaterials] = useState([]);
-  const [sortBy, setSortBy] = useState('price');
   const [priceRange, setPriceRange] = useState([0, 100]);
   const { products, status, error, setCategory } = useProducts();
 
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
   const searchQuery = searchParams.get('search');
@@ -420,25 +521,12 @@ const Catalog = () => {
         product.price >= priceRange[0] && product.price <= priceRange[1],
     );
 
-    // Apply sorting
-    return filtered.sort((a, b) => {
-      switch (sortBy) {
-        case 'price':
-          return a.price - b.price;
-        case 'popularity':
-          return b.popularity - a.popularity;
-        case 'rating':
-          return b.rating - a.rating;
-        default:
-          return 0;
-      }
-    });
+    return filtered;
   }, [
     products,
     selectedCategories,
     selectedMaterials,
     priceRange,
-    sortBy,
     searchQuery,
   ]);
 
@@ -484,6 +572,7 @@ const Catalog = () => {
   return (
     <Box sx={{ display: 'flex', gap: 2 }}>
       <SideNav
+        isMobile={isMobile}
         selectedCategories={selectedCategories}
         toggleCategory={toggleCategory}
         selectedMaterials={selectedMaterials}
@@ -498,7 +587,6 @@ const Catalog = () => {
             selectedMaterials={selectedMaterials}
             handleDeleteFilter={handleDeleteFilter}
           />
-          <SortBy sortBy={sortBy} setSortBy={setSortBy} />
         </Box>
         <ProductGrid
           products={filteredAndSortedProducts}
